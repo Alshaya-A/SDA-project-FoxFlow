@@ -1,0 +1,25 @@
+يا شباب، بنبدأ مشروع FoxFlow: منصة GitLab وDocker وCI/CD على Azure باستخدام Terraform، ومعها تطبيق تجريبي نختبر عليه البناء والنشر.
+
+هذا مستودعنا الخاص:
+https://github.com/Alshaya-A/SDA-project-FoxFlow
+إذا ما يفتح معك، تحتاج أولًا دعوة بحساب GitHub وقبولها.
+
+أرسل لي بالخاص:
+1. اسمك واسم حساب GitHub.
+2. البريد اللي تبي توصلك عليه دعوات المنصات.
+3. نظام جهازك: Windows أو macOS أو Linux.
+4. دورك إذا اتفقنا عليه، وحالة تثبيت البرامج.
+لا ترسل كلمات مرور أو مفاتيح خاصة.
+
+كلنا نحتاج VS Code وGit وOpenSSH ومتصفح. حسب الدور:
+• البنية: Terraform وAzure CLI.
+• المنصة: Docker مع Compose وBash وShellCheck.
+• التطبيق: Node.js 24 مع npm وDocker مع Compose.
+• CI/CD: Node.js 24 وDocker مع Compose وBash وShellCheck وcurl وjq.
+أجهزة Windows تستخدم WSL2 مع Ubuntu لأوامر Linux.
+
+طريقة الشغل: مهمة → فرع → Pull Request → مراجعة زميل → دمج.
+الكود والتوثيق في GitHub، وتشغيل Pipeline لاحقًا في GitLab على Azure.
+
+أول هدف لكل واحد: يقبل الدعوة، يسحب المستودع، يتأكد من البرامج، ويرفع أول تعديل صغير خاص بمهمته.
+برسل روابط التواصل ولوحة المهام وملفات العرض بعد تجهيزها. دعوات GitLab تجي بعد التحقق من جاهزية المنصة.
