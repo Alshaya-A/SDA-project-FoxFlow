@@ -80,3 +80,7 @@ bash scripts/publish-sample.sh git@YOUR-GITLAB:GROUP/sample-app.git main
 - نجح `docker compose config --quiet` مع IMAGE_TAG تجريبي دون تشغيل حاويات.
 - تحقق توقف سكربت المزامنة عند غياب المعاملات أو استخدام رابط غير SSH، وتوقف سكربت النشر عند غياب DEPLOY_HOST.
 - لم يُنفذ بناء التطبيق أو اختباراته أو GitLab CI Lint أو دفع المزامنة أو نشر فعلي.
+
+## تقدم الاختبار المحلي
+
+نجحت تجربة Compose محلية مستقلة بتطبيق مؤقت: قبول HTTP 200 مع JSON صالح، ورفض HTTP 503 وJSON غير صالح. أزيلت حاويات وشبكة التجربة. راجع [خطة الاختبار ونتائجه](integration-test-plan.md) وطريقة إعادة التشغيل. لم يختبر اتصال SSH أو GitLab؛ متطلبات التكامل أعلاه ما زالت قائمة.
