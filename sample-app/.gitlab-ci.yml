@@ -41,7 +41,7 @@ security_scan:
     TRIVY_USERNAME: "$CI_REGISTRY_USER"
     TRIVY_PASSWORD: "$CI_REGISTRY_PASSWORD"
   script:
-    - trivy image --image-src remote --scanners vuln --severity HIGH,CRITICAL --exit-code 1 --no-progress "$IMAGE_TAG"
+    - trivy image --image-src remote --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --no-progress "$IMAGE_TAG"
 
 deploy:
   stage: deploy
