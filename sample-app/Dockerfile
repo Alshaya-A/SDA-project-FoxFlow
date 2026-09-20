@@ -2,6 +2,9 @@
 FROM node:24-slim
 
 # Create app directory inside the container
+# Remove npm and its bundled packages because the runtime only needs Node.js.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
+
 WORKDIR /app
 
 # Copy only what the app needs to run
