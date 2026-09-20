@@ -13,6 +13,7 @@ build:
   services:
     - name: docker:29.7.2-dind
       alias: docker
+      command: ["--insecure-registry=10.0.1.4:5050"]
   variables:
     DOCKER_HOST: tcp://docker:2376
     DOCKER_TLS_CERTDIR: /certs
