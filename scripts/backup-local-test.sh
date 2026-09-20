@@ -18,16 +18,5 @@ if [[ ! -f "$BACKUP_FILE" ]]; then
   exit 1
 fi
 
-log_info "Backup created: $BACKUP_FILE"
-
-require_command az
-log_info "Uploading backup to Azure Blob Storage..."
-az storage blob upload \
-  --account-name "${AZURE_BACKUP_STORAGE_ACCOUNT}" \
-  --container-name "${AZURE_BACKUP_CONTAINER}" \
-  --name "$(basename "$BACKUP_FILE")" \
-  --file "$BACKUP_FILE" \
-  --auth-mode login \
-  --overwrite
-
-log_info "Backup uploaded successfully to ${AZURE_BACKUP_STORAGE_ACCOUNT}/${AZURE_BACKUP_CONTAINER}"
+log_info "Backup created successfully: $BACKUP_FILE"
+ls -lh "$BACKUP_FILE"
