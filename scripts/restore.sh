@@ -13,16 +13,26 @@ fi
 
 CONTAINER="foxflow-gitlab"
 BLOB_NAME="${BACKUP_TIMESTAMP}_gitlab_backup.tar"
-LOCAL_PATH="${FOXFLOW_DATA_PATH}/gitlab/data/backups/${BLOB_NAME}"
+BACKUP_DIR="${GITLAB_BACKUP_DIR:-${FOXFLOW_DATA_PATH}/data/backups}"
+LOCAL_PATH="${BACKUP_DIR}/${BLOB_NAME}"
 
-require_command az
 log_info "Downloading backup $BLOB_NAME from Azure..."
-az storage blob download \
-  --account-name "${AZURE_BACKUP_STORAGE_ACCOUNT}" \
-  --container-name "${AZURE_BACKUP_CONTAINER}" \
-  --name "$BLOB_NAME" \
-  --file "$LOCAL_PATH" \
-  --auth-mode login
+if [[ -n "${AZURE_BACKUP_SAS_TOKEN:-}" ]]; then
+  require_command curl
+  SAS_TOKEN="${AZURE_BACKUP_SAS_TOKEN#\?}"
+  BLOB_URL="https://${AZURE_BACKUP_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_BACKUP_CONTAINER}/${BLOB_NAME}?${SAS_TOKEN}"
+  curl --fail-with-body --silent --show-error \
+    "$BLOB_URL" \
+    --output "$LOCAL_PATH"
+else
+  require_command az
+  az storage blob download \
+    --account-name "${AZURE_BACKUP_STORAGE_ACCOUNT}" \
+    --container-name "${AZURE_BACKUP_CONTAINER}" \
+    --name "$BLOB_NAME" \
+    --file "$LOCAL_PATH" \
+    --auth-mode login
+fi
 
 log_info "Stopping application processes inside GitLab (keeping DB up)..."
 docker exec "$CONTAINER" gitlab-ctl stop puma

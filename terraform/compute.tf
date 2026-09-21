@@ -38,7 +38,11 @@ resource "azurerm_linux_virtual_machine" "ff_vm" {
 
   admin_ssh_key {
     username   = "azureuser"
-    public_key = file("C:/Users/96653/.ssh/id_ed25519.pub")
+    public_key = var.admin_ssh_public_key
+  }
+
+  identity {
+    type = "SystemAssigned"
   }
 
   os_disk {

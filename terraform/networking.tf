@@ -64,6 +64,32 @@ resource "azurerm_network_security_group" "foxflow_nsg" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
+
+  # GitLab Container Registry
+  security_rule {
+    name                       = "Allow-GitLab-Registry"
+    priority                   = 140
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "5050"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  # FoxFlow sample application
+  security_rule {
+    name                       = "Allow-FoxFlow-App"
+    priority                   = 150
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "3000"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
 }
 
 resource "azurerm_subnet_network_security_group_association" "foxflow_subnet_nsg" {

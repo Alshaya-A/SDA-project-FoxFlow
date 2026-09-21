@@ -12,3 +12,9 @@ variable "location" {
   type        = string
   default     = "East US"
 }
+
+variable "admin_ssh_public_key" {
+  description = "OpenSSH public key used by the azureuser account on the VM"
+  type        = string
+  sensitive   = true
+}

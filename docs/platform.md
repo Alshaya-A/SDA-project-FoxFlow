@@ -22,8 +22,10 @@ Storage strategy differs by environment:
 - **Azure VM (production):** Bind mounts on `/srv/foxflow` (the mounted data disk from Terraform)
 - **Local development (macOS/Windows):** Docker named volumes (`gitlab_config`, `gitlab_logs`, `gitlab_data`)
 
-The switch is done manually in `docker-compose.yml` because Docker Desktop on
-macOS does not properly handle SGID permissions required by GitLab on bind mounts.
+On the Azure VM, `configure-gitlab.sh` creates a Compose override with bind
+mounts and the internal registry. Local development keeps the named volumes in
+the base Compose file because Docker Desktop on macOS does not properly handle
+the SGID permissions GitLab needs on bind mounts.
 
 ## Configuration
 
@@ -41,12 +43,16 @@ Key variables:
 
 1. Copy env template and edit values:
    `cp docker/.env.example docker/.env`
-2. Deploy:
+2. On a new Azure VM, mount the Terraform data disk:
+   `sudo ./scripts/mount-data-disk.sh /dev/disk/azure/scsi1/lun0`
+3. Generate and validate the Azure Compose override:
+   `./scripts/configure-gitlab.sh`
+4. Deploy:
    `./scripts/deploy.sh`
-3. Wait for the container to become healthy (3-5 minutes on first boot).
-4. Retrieve the initial root password:
+5. Wait for the container to become healthy (3-5 minutes on first boot).
+6. Retrieve the initial root password:
    `docker exec foxflow-gitlab grep 'Password:' /etc/gitlab/initial_root_password`
-5. Log in at `http://<hostname>:<http_port>` as `root` and change the password.
+7. Log in at `http://<hostname>:<http_port>` as `root` and change the password.
 
 The `initial_root_password` file is deleted automatically 24 hours after
 first reconfigure, so record it immediately.

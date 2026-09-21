@@ -21,8 +21,9 @@ From **Person 1 (Infrastructure):**
 - Public IP of the VM (currently `20.127.65.116`)
 - An Azure Storage Account for backups (currently `ffbackupstorage01`,
   container `gitlab-backups`)
-- The VM must have a Managed Identity with `Storage Blob Data Contributor`
-  on the backup container
+- Prefer a VM Managed Identity with `Storage Blob Data Contributor` on the
+  backup container; use the documented container-scoped SAS fallback when the
+  project account cannot assign Azure roles.
 
 From **Person 4 (CI/CD):**
 - A Runner registration token from GitLab admin panel, added to `.env`
@@ -44,17 +45,19 @@ For **Person 3 (Application):**
 2. Clone the repo (or copy files over)
 3. Install prerequisites:
    - `./scripts/install-docker.sh`
-   - `./scripts/install-azure-cli.sh`
+   - `./scripts/install-azure-cli.sh` when using Managed Identity for backups
    - Log out and back in for docker group membership to apply
-4. `cp docker/.env.example docker/.env` and set real values
-5. `./scripts/deploy.sh`
-6. Retrieve initial root password (see `docs/platform.md`)
-7. `./scripts/harden-gitlab.sh`
-8. Generate runner token in GitLab UI, add to `.env`, then
+4. Mount the data disk with `sudo ./scripts/mount-data-disk.sh <device>`
+5. `cp docker/.env.example docker/.env` and set real values
+6. `./scripts/configure-gitlab.sh`
+7. `./scripts/deploy.sh`
+8. Retrieve initial root password (see `docs/platform.md`)
+9. `./scripts/harden-gitlab.sh`
+10. Generate runner token in GitLab UI, add to `.env`, then
    `./scripts/register-runner.sh`
-9. `./scripts/configure-backup-cron.sh` to schedule daily backups
-10. `az login` (or ensure Managed Identity is active) so `backup.sh` can
-    upload to Azure Blob
+11. `./scripts/configure-backup-cron.sh` to schedule daily backups
+12. Ensure Managed Identity authorization is active, or configure the approved
+    container-scoped SAS fallback, so `backup.sh` can upload to Azure Blob.
 
 ## Status at Handoff
 
@@ -62,14 +65,16 @@ Tested end-to-end on local dev (macOS with Docker Desktop):
 - deploy.sh, health-check.sh, troubleshoot.sh, harden-gitlab.sh,
   redeploy.sh, register-runner.sh all pass
 - backup-local-test.sh produces a valid archive inside the container
-- backup.sh, verify-backup.sh, configure-backup-cron.sh have valid
-  syntax (checked with `bash -n`) but the Azure upload portion needs
-  to be exercised on the real VM against Person 1's storage account
+- backup.sh, verify-backup.sh, and configure-backup-cron.sh pass syntax checks
 
-Not yet done, needs the actual VM:
-- Full backup.sh run with Azure upload
-- verify-backup.sh against the real container
-- restore.sh (destructive; only run when ready to replace GitLab data)
+Validated on the Azure VM on 21 September 2026:
+- `backup.sh` created and uploaded `20260921_083518_gitlab_backup.tar`
+- `verify-backup.sh` downloaded the blob and validated the tar archive
+- daily root cron was installed for 03:00 host time
+
+`restore.sh` is intentionally not executed against the live instance because a
+restore overwrites current GitLab data. Its syntax and download path are checked;
+use it only during an authorized recovery exercise.
 
 ## Known Gotchas
 
@@ -83,8 +88,8 @@ Not yet done, needs the actual VM:
   cannot access an authenticator app during testing, disable via:
   `docker exec foxflow-gitlab gitlab-psql -d gitlabhq_production \
    -c "UPDATE application_settings SET require_two_factor_authentication = false;"`
-- On macOS local dev, `docker-compose.yml` uses named volumes.
-  On the Azure VM, switch back to bind mounts on `/srv/foxflow`.
+- On macOS local dev, `docker-compose.yml` uses named volumes. On the Azure VM,
+  run `configure-gitlab.sh` to generate bind mounts on `/srv/foxflow`.
 
 ## Contact
 

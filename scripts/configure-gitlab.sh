@@ -1,2 +1,48 @@
 #!/usr/bin/env bash
-# TODO: Implement configure-gitlab.
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOCKER_DIR="$(cd "$SCRIPT_DIR/../docker" && pwd)"
+source "$SCRIPT_DIR/lib.sh"
+
+require_env_file "$DOCKER_DIR/.env"
+set -a; source "$DOCKER_DIR/.env"; set +a
+
+: "${GITLAB_HOSTNAME:?GITLAB_HOSTNAME must be set in docker/.env}"
+: "${GITLAB_HTTP_PORT:?GITLAB_HTTP_PORT must be set in docker/.env}"
+: "${GITLAB_SSH_PORT:?GITLAB_SSH_PORT must be set in docker/.env}"
+: "${FOXFLOW_DATA_PATH:?FOXFLOW_DATA_PATH must be set in docker/.env}"
+
+REGISTRY_PORT="${GITLAB_REGISTRY_PORT:-5050}"
+OVERRIDE_FILE="$DOCKER_DIR/docker-compose.override.yml"
+
+install -d -m 0755 \
+  "$FOXFLOW_DATA_PATH/config" \
+  "$FOXFLOW_DATA_PATH/logs" \
+  "$FOXFLOW_DATA_PATH/data"
+
+cat > "$OVERRIDE_FILE" <<'YAML'
+services:
+  gitlab:
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://${GITLAB_HOSTNAME}:${GITLAB_HTTP_PORT}'
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
+        gitlab_rails['gitlab_shell_ssh_port'] = ${GITLAB_SSH_PORT}
+        registry_external_url 'http://${GITLAB_HOSTNAME}:${GITLAB_REGISTRY_PORT:-5050}'
+        registry_nginx['listen_port'] = ${GITLAB_REGISTRY_PORT:-5050}
+        registry_nginx['listen_https'] = false
+    ports:
+      - "${GITLAB_REGISTRY_PORT:-5050}:${GITLAB_REGISTRY_PORT:-5050}"
+    volumes:
+      - ${FOXFLOW_DATA_PATH}/config:/etc/gitlab
+      - ${FOXFLOW_DATA_PATH}/logs:/var/log/gitlab
+      - ${FOXFLOW_DATA_PATH}/data:/var/opt/gitlab
+YAML
+
+chmod 0644 "$OVERRIDE_FILE"
+(cd "$DOCKER_DIR" && docker compose config --quiet)
+
+log_info "Azure GitLab override written to $OVERRIDE_FILE."
+log_info "Registry endpoint: http://${GITLAB_HOSTNAME}:${REGISTRY_PORT}"
+log_info "Run ./scripts/deploy.sh to apply the configuration."

@@ -18,23 +18,37 @@ This document covers how GitLab data is backed up, verified, and restored.
 - `configure-backup-cron.sh` installs a daily cron job at 03:00 (host time)
   that calls `backup.sh` and appends output to `../backup.log`.
 
+## Verified Azure Run
+
+On 21 September 2026, the live VM created
+`20260921_083518_gitlab_backup.tar`, uploaded it to the private
+`ffbackupstorage01/gitlab-backups` container, downloaded it again, and passed
+the `tar -tf` integrity check. The uploaded object was 81,305,600 bytes. The
+daily root cron entry was also confirmed on the VM.
+
 ## What backup.sh Does
 
 1. Runs `gitlab-backup create BACKUP=<timestamp>` inside the container.
 2. Validates that the resulting `.tar` file exists at the expected path
-   (`${FOXFLOW_DATA_PATH}/gitlab/data/backups/`).
-3. Uploads the file to Azure Blob Storage using `az storage blob upload`
-   with `--auth-mode login`, so no access keys are stored in `.env`.
+   (`${FOXFLOW_DATA_PATH}/data/backups/` by default).
+3. Uploads the file to Azure Blob Storage. Managed Identity with
+   `Storage Blob Data Contributor` and Azure CLI is preferred. When assigning
+   that role is not available, a container-scoped SAS token can be supplied as
+   `AZURE_BACKUP_SAS_TOKEN`; the script then uploads directly with `curl`.
 
 ## Environment Requirements
 
-- Azure CLI (`az`) installed on the VM (see `install-azure-cli.sh`).
+- `curl` and Python 3 when using SAS authentication, or Azure CLI (`az`) when
+  using Managed Identity authentication.
 - The VM's Managed Identity (or the logged-in az user) must have
   `Storage Blob Data Contributor` on the backup container.
 - The following variables in `.env`:
   - `AZURE_BACKUP_STORAGE_ACCOUNT`
   - `AZURE_BACKUP_CONTAINER`
   - `FOXFLOW_DATA_PATH`
+  - `GITLAB_BACKUP_DIR` when the backup directory is not
+    `${FOXFLOW_DATA_PATH}/data/backups`
+  - `AZURE_BACKUP_SAS_TOKEN` only when Managed Identity authorization is not available
 
 ## Verifying Backups
 
