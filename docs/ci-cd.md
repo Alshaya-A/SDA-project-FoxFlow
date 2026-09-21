@@ -2,7 +2,7 @@
 
 ## الحالة
 
-تم تجهيز المسار والتطبيق الحقيقي مع Dockerfile والاختبارات، ونجح التشغيل المحلي. لم يُشغّل المسار بعد على GitLab أو Runner، ولم يحدث نشر على Azure أو إرسال إشعار خارجي.
+تم تجهيز المسار والتطبيق الحقيقي مع Dockerfile والاختبارات، وتشغيله على GitLab Runner، ونشره على Azure بنجاح. نجح Pipeline رقم 5 بجميع مراحله، وأعاد فحص `GET /health` الخارجي استجابة HTTP 200. الإشعار الحالي تقرير داخلي في GitLab؛ لم تُضف قناة Discord أو بريد خارجي.
 GitHub هو مصدر الكود؛ جذر مشروع GitLab يجب أن يحتوي **محتويات sample-app** مباشرة.
 
 ## اتفاق العضو ٣
@@ -32,7 +32,7 @@ GitHub هو مصدر الكود؛ جذر مشروع GitLab يجب أن يحتو�
 - خادم النشر يحتوي Docker مع Compose يدعم `up --wait`؛ حساب النشر يستطيع الوصول إلى Docker عبر SSH.
 - تأكيد هوية خادم SSH من مصدر موثوق وتسليم known_hosts؛ لا تعطّل التحقق من المضيف.
 - حماية الفرع الافتراضي، وحصر أسرار النشر بالفرع المحمي وبيئة production.
-- فتح APP_PORT في شبكة Azure عند الحاجة. Compose يفترض 8080 على المضيف ويربطه بالمنفذ 3000 داخل الحاوية؛ GitLab ليس ضمن Compose الخاص بالتطبيق.
+- فتح APP_PORT في شبكة Azure عند الحاجة. النشر الحالي يستخدم المنفذ 3000 على المضيف ويربطه بالمنفذ 3000 داخل الحاوية؛ GitLab ليس ضمن Compose الخاص بالتطبيق.
 
 ## المتغيرات في GitLab Settings → CI/CD → Variables
 
@@ -43,7 +43,7 @@ GitHub هو مصدر الكود؛ جذر مشروع GitLab يجب أن يحتو�
 | DEPLOY_USER | Variable، Protected | حساب SSH على الخادم |
 | SSH_PRIVATE_KEY | File، Protected | مفتاح حساب النشر، دون passphrase للتشغيل الآلي؛ لا يرفع إلى Git |
 | SSH_KNOWN_HOSTS | File، Protected | مفاتيح المضيف التي جرى التحقق منها |
-| APP_PORT | Variable اختياري | منفذ المضيف، الافتراضي 8080 |
+| APP_PORT | Variable اختياري | منفذ المضيف؛ القيمة المستخدمة في Azure هي 3000 |
 
 CI_REGISTRY وCI_REGISTRY_IMAGE وCI_REGISTRY_USER وCI_REGISTRY_PASSWORD وCI_COMMIT_SHA وCI_PIPELINE_URL متغيرات GitLab المدمجة؛ لا تكتب قيمًا سرية في الملفات. IMAGE_TAG يحسب تلقائيًا من registry وcommit. عطّل debug tracing عند استخدام الأسرار.
 
@@ -64,7 +64,7 @@ bash scripts/publish-sample.sh git@YOUR-GITLAB:GROUP/sample-app.git main
 - فحص صياغة shell بـShellCheck وفحص Compose بمتغير IMAGE_TAG تجريبي.
 - فحص YAML محليًا لا يعوض GitLab CI Lint على إصدار GitLab الفعلي.
 - عند جاهزية GitLab: CI Lint، ثم Pipeline بميزة النشر معطلة، ثم اختبار فشل الاختبارات والفحص الأمني للتأكد من حجب Deploy.
-- بعدها فعّل النشر وتحقق من /health خارجيًا، واحتفظ برابط Pipeline ودليل الاستجابة. هذه خطوات تكامل لم تنفذ بعد.
+- فُعّل النشر وتحققنا من `/health` خارجيًا، وحُفظت نتيجة Pipeline ودليل الاستجابة أدناه.
 - المراجع: العضو ٣ للأوامر والاختبارات، والعضو ٢ للـRunner والنشر.
 
 ## مراجع التصميم
@@ -79,10 +79,18 @@ bash scripts/publish-sample.sh git@YOUR-GITLAB:GROUP/sample-app.git main
 - نجح `docker compose config --quiet` مع IMAGE_TAG تجريبي دون تشغيل حاويات.
 - تحقق توقف سكربت المزامنة عند غياب المعاملات أو استخدام رابط غير SSH، وتوقف سكربت النشر عند غياب DEPLOY_HOST.
 - نجح `npm ci` واختبارات التطبيق الأربعة، وبناء صورة Docker وتشغيلها وفحص `/health`.
-- لم يُنفذ GitLab CI Lint أو دفع المزامنة أو نشر فعلي على Azure.
+- نُشرت نسخة التطبيق إلى GitLab، وشُغلت مراحل GitLab الفعلية، ثم نُشر التطبيق على Azure.
 
 ## تقدم الاختبار المحلي
 
 نجحت تجربة Compose محلية مستقلة بتطبيق مؤقت: قبول HTTP 200 مع JSON صالح، ورفض HTTP 503 وJSON غير صالح. أزيلت حاويات وشبكة التجربة. راجع [خطة الاختبار ونتائجه](integration-test-plan.md) وطريقة إعادة التشغيل. لم يختبر اتصال SSH أو GitLab؛ متطلبات التكامل أعلاه ما زالت قائمة.
 
 وفي 17 سبتمبر 2026، نجحت أيضًا اختبارات التطبيق الحقيقي، وبناء صورته وتشغيلها، ثم تشغيلها عبر Compose الفعلي ووصولها إلى `Healthy` مع الاستجابة `{"status":"ok","service":"foxflow-sample"}`.
+
+### نتيجة التكامل الفعلية — 21 سبتمبر 2026
+
+- Pipeline رقم 5 على الفرع المحمي `main` نجح خلال 1 دقيقة و34 ثانية.
+- نجحت الوظائف الخمس: `build` و`test` و`security_scan` و`deploy` و`notify`.
+- أضيفت متغيرات النشر الستة إلى GitLab، بما فيها مفتاح SSH وملف `known_hosts` كمتغيري File محميين.
+- تعمل الحاوية `foxflow-app-app-1` بحالة `healthy` مع الربط `0.0.0.0:3000->3000/tcp`.
+- أعاد `http://20.127.65.116:3000/health` الاستجابة `HTTP/1.1 200 OK` والجسم `{"status":"ok","service":"foxflow-sample"}`.
