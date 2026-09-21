@@ -3,7 +3,7 @@ set -uo pipefail
 
 STATE_DIR="${STATE_DIR:-/var/lib/foxflow-monitor}"
 STATE_FILE="$STATE_DIR/state"
-GITLAB_HEALTH_URL="${GITLAB_HEALTH_URL:-http://127.0.0.1:8080/-/health}"
+GITLAB_HEALTH_URL="${GITLAB_HEALTH_URL:-http://127.0.0.1:8080/users/sign_in}"
 APP_HEALTH_URL="${APP_HEALTH_URL:-http://127.0.0.1:3000/health}"
 BACKUP_DIR="${BACKUP_DIR:-/srv/foxflow/data/backups}"
 DISK_WARN_PERCENT="${DISK_WARN_PERCENT:-75}"

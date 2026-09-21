@@ -23,7 +23,7 @@ umask 077
 {
   printf 'TELEGRAM_BOT_TOKEN=%s\n' "$TELEGRAM_BOT_TOKEN"
   printf 'TELEGRAM_CHAT_ID=%s\n' "$TELEGRAM_CHAT_ID"
-  printf 'GITLAB_HEALTH_URL=http://127.0.0.1:8080/-/health\n'
+  printf 'GITLAB_HEALTH_URL=http://127.0.0.1:8080/users/sign_in\n'
   printf 'APP_HEALTH_URL=http://127.0.0.1:3000/health\n'
   printf 'BACKUP_DIR=/srv/foxflow/data/backups\n'
 } > "$tmp_env"
