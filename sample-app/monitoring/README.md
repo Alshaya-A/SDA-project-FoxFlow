@@ -22,3 +22,15 @@ systemctl status foxflow-monitor.timer
 sudo systemctl start foxflow-monitor.service
 sudo journalctl -u foxflow-monitor.service --since today
 ```
+
+## Committee failure demonstration
+
+The demo runs an isolated copy of the application on VM port `3001`. It does
+not stop or reconfigure the production application on port `3000`.
+
+```bash
+sudo foxflow-failure-demo fail     # HTTP 503 + official Telegram alert
+sudo foxflow-failure-demo status   # show the demo container and HTTP result
+sudo foxflow-failure-demo recover  # HTTP 200 + official recovery alert
+sudo foxflow-failure-demo cleanup  # remove the disposable demo container
+```

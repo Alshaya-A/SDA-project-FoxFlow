@@ -32,6 +32,7 @@ ssh "$remote" "umask 077; mkdir -p '$remote_dir'"
 scp monitoring/foxflow-monitor.sh "$remote:$remote_dir/foxflow-monitor"
 scp monitoring/foxflow-monitor.service "$remote:$remote_dir/foxflow-monitor.service"
 scp monitoring/foxflow-monitor.timer "$remote:$remote_dir/foxflow-monitor.timer"
+scp demo/foxflow-failure-demo.sh "$remote:$remote_dir/foxflow-failure-demo"
 scp "$tmp_env" "$remote:$remote_dir/foxflow-monitor.env"
 
 ssh "$remote" "
@@ -39,6 +40,7 @@ ssh "$remote" "
   sudo install -m 0755 '$remote_dir/foxflow-monitor' /usr/local/sbin/foxflow-monitor
   sudo install -m 0644 '$remote_dir/foxflow-monitor.service' /etc/systemd/system/foxflow-monitor.service
   sudo install -m 0644 '$remote_dir/foxflow-monitor.timer' /etc/systemd/system/foxflow-monitor.timer
+  sudo install -m 0755 '$remote_dir/foxflow-failure-demo' /usr/local/sbin/foxflow-failure-demo
   sudo install -m 0600 '$remote_dir/foxflow-monitor.env' /etc/foxflow-monitor.env
   sudo mkdir -p -m 0750 /var/lib/foxflow-monitor
   sudo systemctl daemon-reload

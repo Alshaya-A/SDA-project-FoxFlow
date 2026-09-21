@@ -9,6 +9,18 @@ application deployed automatically after build, test, and security gates pass.
 - GitLab: `http://20.127.65.116:8080`
 - Application: `http://20.127.65.116:3000`
 - Health endpoint: `http://20.127.65.116:3000/health`
+
+## Committee failure demo
+
+After a successful deployment, run the isolated failure demonstration from the
+repository root. It leaves the production application running on port `3000`.
+
+```bash
+bash scripts/committee-failure-demo.sh fail
+bash scripts/committee-failure-demo.sh status
+bash scripts/committee-failure-demo.sh recover
+bash scripts/committee-failure-demo.sh cleanup
+```
 - Default branch: protected `main`
 - Latest verified deployment: GitLab Pipeline **#5**, commit `8ddb455c`
 - Pipeline jobs: `build`, `test`, `security_scan`, `deploy`, and `notify`

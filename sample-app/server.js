@@ -22,8 +22,14 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // Health check — the pipeline relies on this exact response
+  // Health check — the pipeline relies on this exact response in normal mode.
+  // The opt-in failure mode is used only by the isolated committee demo.
   if (req.url === '/health') {
+    if (process.env.FOXFLOW_DEMO_FAIL === 'true') {
+      res.writeHead(503, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ status: 'error', service: 'foxflow-sample', demo: true }));
+      return;
+    }
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(HEALTH_BODY);
     return;

@@ -33,6 +33,17 @@ test('GET /health returns 200 and the exact agreed payload', async () => {
   assert.strictEqual(res.body, '{"status":"ok","service":"foxflow-sample"}');
 });
 
+test('GET /health returns 503 in the opt-in committee demo mode', async () => {
+  process.env.FOXFLOW_DEMO_FAIL = 'true';
+  try {
+    const res = await request('GET', '/health');
+    assert.strictEqual(res.status, 503);
+    assert.strictEqual(res.body, '{"status":"error","service":"foxflow-sample","demo":true}');
+  } finally {
+    delete process.env.FOXFLOW_DEMO_FAIL;
+  }
+});
+
 test('GET / returns 200 and HTML', async () => {
   const res = await request('GET', '/');
   assert.strictEqual(res.status, 200);

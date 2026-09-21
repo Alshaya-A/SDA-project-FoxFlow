@@ -10,6 +10,9 @@ DISK_WARN_PERCENT="${DISK_WARN_PERCENT:-75}"
 DISK_FAIL_PERCENT="${DISK_FAIL_PERCENT:-90}"
 BACKUP_WARN_HOURS="${BACKUP_WARN_HOURS:-26}"
 BACKUP_FAIL_HOURS="${BACKUP_FAIL_HOURS:-36}"
+GITLAB_CONTAINER="${GITLAB_CONTAINER:-foxflow-gitlab}"
+RUNNER_CONTAINER="${RUNNER_CONTAINER:-foxflow-runner}"
+APP_CONTAINER="${APP_CONTAINER:-foxflow-app-app-1}"
 
 : "${TELEGRAM_BOT_TOKEN:?TELEGRAM_BOT_TOKEN is required}"
 : "${TELEGRAM_CHAT_ID:?TELEGRAM_CHAT_ID is required}"
@@ -45,9 +48,9 @@ container_check() {
   set_check "$key" ok "$container is running"
 }
 
-container_check gitlab foxflow-gitlab yes
-container_check runner foxflow-runner no
-container_check app foxflow-app-app-1 yes
+container_check gitlab "$GITLAB_CONTAINER" yes
+container_check runner "$RUNNER_CONTAINER" no
+container_check app "$APP_CONTAINER" yes
 
 if curl --fail --silent --show-error --max-time 10 "$GITLAB_HEALTH_URL" >/dev/null 2>&1; then
   set_check gitlab_http ok "GitLab HTTP health passed"
