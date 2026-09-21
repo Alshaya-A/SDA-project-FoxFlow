@@ -24,3 +24,12 @@ trap 'docker logout "$CI_REGISTRY" >/dev/null 2>&1 || true' EXIT
 docker compose -p foxflow-app -f deploy/docker-compose.yml config --quiet
 docker compose -p foxflow-app -f deploy/docker-compose.yml pull
 docker compose -p foxflow-app -f deploy/docker-compose.yml up -d --wait --wait-timeout 120
+
+# Install or refresh proactive host monitoring after a successful deployment.
+# Telegram secrets are copied over SSH to a root-owned environment file and are
+# never stored in the repository or printed to the job log.
+if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then
+  sh ci/install-monitoring.sh
+else
+  echo 'Telegram variables are not configured; host monitoring was not installed.' >&2
+fi

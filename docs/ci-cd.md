@@ -19,7 +19,7 @@ GitHub هو مصدر الكود؛ جذر مشروع GitLab يجب أن يحتو�
 2. Test: ينفذ npm ci وnpm test على نفس commit، في Node.js 24.
 3. Security Scan: يفحص الصورة بـTrivy؛ أي ثغرة HIGH أو CRITICAL أو فشل تشغيل الفاحص يمنع النشر.
 4. Deploy: يعمل فقط على الفرع الافتراضي المحمي وعند DEPLOY_ENABLED=true، بعد نجاح المراحل السابقة. يستخدم SSH وCompose على Docker في الخادم، وينتظر صحة التطبيق حتى 120 ثانية. النشرات متسلسلة عبر resource_group.
-5. Notify: ينشئ pipeline-summary.txt مع رابط نتائج الوظائف حتى عند فشل مرحلة سابقة. **هذا تقرير داخل GitLab؛ إرسال Discord أو البريد غير منفذ** إلى حين الاتفاق على القناة. لا يعد نجاح هذه الوظيفة دليلًا على نشر التطبيق.
+5. Notify: يرسل نتيجة نجاح أو فشل Pipeline إلى مجموعة Telegram، وينشئ `pipeline-summary.txt`. فشل Telegram يظهر كتحذير ولا يلغي نتيجة البناء أو النشر.
 
 لا توجد allow_failure أو needs تتجاوز بوابات المراحل. رفع الصورة في Build لا ينشرها على الخادم.
 فشل فحص الصحة يفشل النشر، لكنه لا يعيد الإصدار السابق تلقائيًا؛ قد تبقى الحاوية الجديدة غير سليمة. الاسترجاع مهمة تكامل لاحقة.
@@ -44,6 +44,8 @@ GitHub هو مصدر الكود؛ جذر مشروع GitLab يجب أن يحتو�
 | SSH_PRIVATE_KEY | File، Protected | مفتاح حساب النشر، دون passphrase للتشغيل الآلي؛ لا يرفع إلى Git |
 | SSH_KNOWN_HOSTS | File، Protected | مفاتيح المضيف التي جرى التحقق منها |
 | APP_PORT | Variable اختياري | منفذ المضيف؛ القيمة المستخدمة في Azure هي 3000 |
+| TELEGRAM_BOT_TOKEN | Masked and hidden، Protected | رمز بوت Telegram؛ لا يكتب في Git |
+| TELEGRAM_CHAT_ID | Protected | معرف مجموعة تنبيهات الفريق |
 
 CI_REGISTRY وCI_REGISTRY_IMAGE وCI_REGISTRY_USER وCI_REGISTRY_PASSWORD وCI_COMMIT_SHA وCI_PIPELINE_URL متغيرات GitLab المدمجة؛ لا تكتب قيمًا سرية في الملفات. IMAGE_TAG يحسب تلقائيًا من registry وcommit. عطّل debug tracing عند استخدام الأسرار.
 
@@ -92,5 +94,6 @@ bash scripts/publish-sample.sh git@YOUR-GITLAB:GROUP/sample-app.git main
 - Pipeline رقم 5 على الفرع المحمي `main` نجح خلال 1 دقيقة و34 ثانية.
 - نجحت الوظائف الخمس: `build` و`test` و`security_scan` و`deploy` و`notify`.
 - أضيفت متغيرات النشر الستة إلى GitLab، بما فيها مفتاح SSH وملف `known_hosts` كمتغيري File محميين.
+- أضيفت تنبيهات Telegram للنجاح والفشل، ومراقبة دورية للخدمات والقرص وحداثة النسخة الاحتياطية على الخادم.
 - تعمل الحاوية `foxflow-app-app-1` بحالة `healthy` مع الربط `0.0.0.0:3000->3000/tcp`.
 - أعاد `http://20.127.65.116:3000/health` الاستجابة `HTTP/1.1 200 OK` والجسم `{"status":"ok","service":"foxflow-sample"}`.

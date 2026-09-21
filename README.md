@@ -99,6 +99,12 @@ See [CI/CD documentation](docs/ci-cd.md) and the
 ./scripts/verify-backup.sh
 ```
 
+Production also runs `foxflow-monitor.timer` every five minutes. It sends a
+Telegram alert when GitLab, the Runner, the application, disk capacity, or
+backup freshness changes to warning/failure, and sends a recovery message when
+the condition clears. Pipeline success and failure notifications use the same
+Telegram group.
+
 Environment values belong in `docker/.env`, which must remain uncommitted and
 mode `600`. See [platform operations](docs/platform.md) and
 [backup and restore](docs/backup-restore.md).
