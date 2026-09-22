@@ -19,7 +19,7 @@ GitHub هو مصدر الكود؛ جذر مشروع GitLab يجب أن يحتو�
 2. Test: ينفذ npm ci وnpm test على نفس commit، في Node.js 24.
 3. Security Scan: يفحص الصورة بـTrivy؛ أي ثغرة HIGH أو CRITICAL أو فشل تشغيل الفاحص يمنع النشر.
 4. Deploy: يعمل فقط على الفرع الافتراضي المحمي وعند DEPLOY_ENABLED=true، بعد نجاح المراحل السابقة. يستخدم SSH وCompose على Docker في الخادم، وينتظر صحة التطبيق حتى 120 ثانية. النشرات متسلسلة عبر resource_group.
-5. Notify: يرسل نتيجة نجاح أو فشل Pipeline إلى مجموعة Telegram، وينشئ `pipeline-summary.txt`. فشل Telegram يظهر كتحذير ولا يلغي نتيجة البناء أو النشر.
+5. Notify: يرسل نتيجة Pipeline باللغة الإنجليزية إلى مجموعة Telegram، وينشئ `pipeline-summary.txt`. عند الفشل يجلب اسم المهمة وسجلها من GitLab، ثم يطلب من OpenRouter شرح السبب والدليل والحل المقترح قبل إرسال الرسالة. إذا تعذر GitLab API أو OpenRouter، يرسل إشعار فشل بديلًا بدل فقدان التنبيه. فشل الإشعار يظهر كتحذير ولا يغيّر نتيجة البناء أو النشر.
 
 لا توجد allow_failure أو needs تتجاوز بوابات المراحل. رفع الصورة في Build لا ينشرها على الخادم.
 فشل فحص الصحة يفشل النشر، لكنه لا يعيد الإصدار السابق تلقائيًا؛ قد تبقى الحاوية الجديدة غير سليمة. الاسترجاع مهمة تكامل لاحقة.
@@ -46,6 +46,9 @@ GitHub هو مصدر الكود؛ جذر مشروع GitLab يجب أن يحتو�
 | APP_PORT | Variable اختياري | منفذ المضيف؛ القيمة المستخدمة في Azure هي 3000 |
 | TELEGRAM_BOT_TOKEN | Masked and hidden، Protected | رمز بوت Telegram؛ لا يكتب في Git |
 | TELEGRAM_CHAT_ID | Protected | معرف مجموعة تنبيهات الفريق |
+| OPENROUTER_API_KEY | Masked and hidden، Protected | مفتاح OpenRouter لتحليل فشل Pipeline؛ لا يكتب في Git |
+| OPENROUTER_MODEL | Variable اختياري | نموذج OpenRouter؛ الافتراضي `openrouter/free` |
+| GITLAB_API_TOKEN | Masked and hidden، Protected | Project access token بصلاحية `read_api` لقراءة سجل المهمة الفاشلة؛ عند غيابه يحاول السكربت استخدام `CI_JOB_TOKEN` |
 
 CI_REGISTRY وCI_REGISTRY_IMAGE وCI_REGISTRY_USER وCI_REGISTRY_PASSWORD وCI_COMMIT_SHA وCI_PIPELINE_URL متغيرات GitLab المدمجة؛ لا تكتب قيمًا سرية في الملفات. IMAGE_TAG يحسب تلقائيًا من registry وcommit. عطّل debug tracing عند استخدام الأسرار.
 

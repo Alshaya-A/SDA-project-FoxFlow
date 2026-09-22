@@ -61,27 +61,10 @@ deploy:
 
 .telegram_notify:
   stage: notify
-  image:
-    name: curlimages/curl:8.17.0
-    entrypoint: [""]
+  image: node:24-alpine
   allow_failure: true
   script:
-    - |
-      test -n "${TELEGRAM_BOT_TOKEN:-}" || { echo 'TELEGRAM_BOT_TOKEN is not configured'; exit 1; }
-      test -n "${TELEGRAM_CHAT_ID:-}" || { echo 'TELEGRAM_CHAT_ID is not configured'; exit 1; }
-      MESSAGE="${TELEGRAM_ICON} FoxFlow Pipeline ${TELEGRAM_RESULT}
-      Project: ${CI_PROJECT_PATH}
-      Branch: ${CI_COMMIT_REF_NAME}
-      Commit: ${CI_COMMIT_SHORT_SHA}
-      Pipeline: ${CI_PIPELINE_URL}"
-      printf '%s\n' "$MESSAGE" > pipeline-summary.txt
-      cat pipeline-summary.txt
-      curl --fail --silent --show-error \
-        --request POST \
-        "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-        --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-        --data-urlencode "text=${MESSAGE}" \
-        >/dev/null
+    - node ci/notify.mjs
   artifacts:
     when: always
     paths: [pipeline-summary.txt]
@@ -91,12 +74,10 @@ notify_success:
   extends: .telegram_notify
   when: on_success
   variables:
-    TELEGRAM_ICON: "✅"
-    TELEGRAM_RESULT: "succeeded"
+    PIPELINE_RESULT: "success"
 
 notify_failure:
   extends: .telegram_notify
   when: on_failure
   variables:
-    TELEGRAM_ICON: "🚨"
-    TELEGRAM_RESULT: "failed"
+    PIPELINE_RESULT: "failure"
