@@ -41,7 +41,8 @@ failure_demo:
     - if: '$FAILURE_DEMO == "true"'
     - when: never
   script:
-    - printf '%s\n' 'Health check failed: expected HTTP 200 but received HTTP 500 at /health.' | tee failure-context.txt
+    - |
+      printf '%s\n' 'Health check failed: expected HTTP 200 but received HTTP 500 at /health.' | tee failure-context.txt
     - exit 1
   artifacts:
     when: always
