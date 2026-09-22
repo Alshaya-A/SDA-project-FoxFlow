@@ -34,6 +34,20 @@ test:
     - npm ci
     - npm test
 
+failure_demo:
+  stage: test
+  image: alpine:3.22
+  rules:
+    - if: '$FAILURE_DEMO == "true"'
+    - when: never
+  script:
+    - printf '%s\n' 'Health check failed: expected HTTP 200 but received HTTP 500 at /health.' | tee failure-context.txt
+    - exit 1
+  artifacts:
+    when: always
+    paths: [failure-context.txt]
+    expire_in: 1 day
+
 security_scan:
   stage: security_scan
   image:

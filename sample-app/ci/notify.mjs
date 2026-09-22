@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 
 const env = process.env;
@@ -47,6 +47,15 @@ async function gitLabGet(path, responseType = "json") {
 }
 
 async function getFailureContext() {
+  try {
+    const artifactContext = await readFile("failure-context.txt", "utf8");
+    if (artifactContext.trim()) {
+      return tail(`Failed job: failure_demo\nStage: test\n\nRelevant log tail:\n${artifactContext}`);
+    }
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw error;
+  }
+
   const jobs = await gitLabGet(
     `/projects/${env.CI_PROJECT_ID}/pipelines/${env.CI_PIPELINE_ID}/jobs?scope[]=failed&per_page=20`,
   );

@@ -50,6 +50,10 @@ GitHub هو مصدر الكود؛ جذر مشروع GitLab يجب أن يحتو�
 | OPENROUTER_MODEL | Variable اختياري | نموذج OpenRouter؛ الافتراضي `openrouter/free` |
 | GITLAB_API_TOKEN | Masked and hidden، Protected | Project access token بصلاحية `read_api` لقراءة سجل المهمة الفاشلة؛ عند غيابه يحاول السكربت استخدام `CI_JOB_TOKEN` |
 
+لعرض فشل آمن أمام اللجنة، شغّل Pipeline على الفرع الرئيسي المحمي مع المتغير
+`FAILURE_DEMO=true`. تنشئ مهمة `failure_demo` خطأ Health Check تجريبيًا، دون تغيير
+التطبيق المنشور، وتختبر مسار OpenRouter وTelegram كاملًا.
+
 CI_REGISTRY وCI_REGISTRY_IMAGE وCI_REGISTRY_USER وCI_REGISTRY_PASSWORD وCI_COMMIT_SHA وCI_PIPELINE_URL متغيرات GitLab المدمجة؛ لا تكتب قيمًا سرية في الملفات. IMAGE_TAG يحسب تلقائيًا من registry وcommit. عطّل debug tracing عند استخدام الأسرار.
 
 ## المزامنة إلى GitLab
