@@ -136,6 +136,25 @@
     .stage-label { margin: 12px 0 8px; font-size: .8rem; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
     .stage-state { min-width: 120px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 7px 12px; color: var(--mint); border: 1px solid #2d659b; border-radius: 4px; background: rgba(14, 40, 74, .58); font-size: .66rem; font-weight: 800; text-transform: uppercase; }
     .stage-state .icon { width: 16px; height: 16px; stroke-width: 2.5; }
+    .stage[data-status="failed"] .stage-icon,
+    .stage[data-status="canceled"] .stage-icon { background: var(--danger); }
+    .stage[data-status="failed"] .stage-state,
+    .stage[data-status="canceled"] .stage-state { color: var(--danger); border-color: rgba(255, 101, 125, .55); }
+    .stage[data-status="running"] .stage-icon,
+    .stage[data-status="pending"] .stage-icon { background: #ffd166; animation: pulse 1.25s infinite; }
+    .stage[data-status="running"] .stage-state,
+    .stage[data-status="pending"] .stage-state { color: #ffd166; border-color: rgba(255, 209, 102, .55); }
+    .stage[data-status="created"] .stage-icon,
+    .stage[data-status="manual"] .stage-icon,
+    .stage[data-status="skipped"] .stage-icon { color: #59708f; background: #9aabc2; }
+    .stage[data-status="created"] .stage-state,
+    .stage[data-status="manual"] .stage-state,
+    .stage[data-status="skipped"] .stage-state { color: #9aabc2; }
+    body[data-pipeline="failed"] .overview-panel { border-color: var(--danger); }
+    body[data-pipeline="failed"] .result-check { background: var(--danger); }
+    body[data-pipeline="running"] .result-check { background: #ffd166; animation: pulse 1.25s infinite; }
+    body[data-pipeline="failed"] .pipeline-result { color: var(--danger); }
+    body[data-pipeline="running"] .pipeline-result { color: #ffd166; }
 
     .detail-grid { display: grid; grid-template-columns: 1.22fr .92fr .98fr; gap: 15px; margin-top: 16px; }
     .detail-panel { min-height: 280px; }
@@ -168,6 +187,10 @@
     .activity-item:last-child { border-bottom: 0; }
     .activity-check { width: 16px; height: 16px; display: grid; place-items: center; border-radius: 50%; color: #07162b; background: var(--mint); }
     .activity-check .icon { width: 10px; height: 10px; stroke-width: 2.8; }
+    .activity-item[data-status="failed"] .activity-check,
+    .activity-item[data-status="canceled"] .activity-check { background: var(--danger); }
+    .activity-item[data-status="running"] .activity-check,
+    .activity-item[data-status="pending"] .activity-check { background: #ffd166; }
     .activity-time { color: var(--muted); }
     .activity-message { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -286,53 +309,46 @@
     </aside>
 
     <main class="main">
-      <header class="topbar"><span class="live-dot" aria-hidden="true"></span><span id="top-status">All systems operational</span><span class="topbar-divider"></span><time id="clock-date">Loading UTC time</time></header>
+      <header class="topbar"><span class="live-dot" aria-hidden="true"></span><span id="top-status">Connecting to GitLab</span><span class="topbar-divider"></span><time id="clock-date">Loading UTC time</time></header>
 
       <section class="panel overview-panel" id="overview" aria-labelledby="health-title">
         <div class="health-main">
           <div class="health-check" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></div>
-          <div class="health-copy"><h1 class="health-title" id="health-title">SYSTEMS HEALTHY</h1><p class="health-subtitle" id="health-subtitle">All services running normally</p></div>
+          <div class="health-copy"><h1 class="health-title" id="health-title">CONNECTING</h1><p class="health-subtitle" id="health-subtitle">Loading live GitLab data</p></div>
         </div>
         <div class="health-metrics" aria-label="System totals">
-          <span>Services</span><strong id="services-count">4 / 4</strong>
-          <span>Pipelines</span><strong>1 / 1</strong>
-          <span>Security</span><strong>OK</strong>
-          <span>Deployments</span><strong id="deployment-status">OK</strong>
+          <span>Services</span><strong id="services-count">—</strong>
+          <span>Jobs</span><strong id="jobs-count">—</strong>
+          <span>Security</span><strong id="security-status">—</strong>
+          <span>Deployment</span><strong id="deployment-status">—</strong>
         </div>
       </section>
 
       <section class="panel pipeline-panel" id="pipeline" aria-labelledby="pipeline-title">
-        <header class="section-head"><h2 class="section-title" id="pipeline-title">Pipeline #25</h2><div class="pipeline-result"><span class="result-check"><svg class="icon"><use href="#i-check"/></svg></span><span id="pipeline-result">Succeeded</span><span class="result-separator">•</span><span class="duration">3m 42s</span></div></header>
+        <header class="section-head"><h2 class="section-title" id="pipeline-title">Pipeline —</h2><div class="pipeline-result"><span class="result-check"><svg class="icon"><use href="#i-check"/></svg></span><span id="pipeline-result">Loading</span><span class="result-separator">•</span><span class="duration" id="pipeline-duration">—</span></div></header>
         <div class="stages">
-          <article class="stage"><div class="stage-icon"><svg class="icon"><use href="#i-gear"/></svg></div><h3 class="stage-label">Build</h3><span class="stage-state"><svg class="icon"><use href="#i-check"/></svg>Passed</span></article>
-          <article class="stage"><div class="stage-icon"><svg class="icon"><use href="#i-flask"/></svg></div><h3 class="stage-label">Test</h3><span class="stage-state"><svg class="icon"><use href="#i-check"/></svg>Passed</span></article>
-          <article class="stage"><div class="stage-icon"><svg class="icon"><use href="#i-shield"/></svg></div><h3 class="stage-label">Security</h3><span class="stage-state"><svg class="icon"><use href="#i-check"/></svg>Passed</span></article>
-          <article class="stage"><div class="stage-icon"><svg class="icon"><use href="#i-box"/></svg></div><h3 class="stage-label">Deploy</h3><span class="stage-state"><svg class="icon"><use href="#i-check"/></svg>Passed</span></article>
-          <article class="stage"><div class="stage-icon"><svg class="icon"><use href="#i-bell"/></svg></div><h3 class="stage-label">Notify</h3><span class="stage-state"><svg class="icon"><use href="#i-check"/></svg>Passed</span></article>
+          <article class="stage" data-job="build" data-status="created"><div class="stage-icon"><svg class="icon"><use href="#i-gear"/></svg></div><h3 class="stage-label">Build</h3><span class="stage-state"><svg class="icon"><use href="#i-check"/></svg><span>Waiting</span></span></article>
+          <article class="stage" data-job="test" data-status="created"><div class="stage-icon"><svg class="icon"><use href="#i-flask"/></svg></div><h3 class="stage-label">Test</h3><span class="stage-state"><svg class="icon"><use href="#i-check"/></svg><span>Waiting</span></span></article>
+          <article class="stage" data-job="security_scan" data-status="created"><div class="stage-icon"><svg class="icon"><use href="#i-shield"/></svg></div><h3 class="stage-label">Security</h3><span class="stage-state"><svg class="icon"><use href="#i-check"/></svg><span>Waiting</span></span></article>
+          <article class="stage" data-job="deploy" data-status="created"><div class="stage-icon"><svg class="icon"><use href="#i-box"/></svg></div><h3 class="stage-label">Deploy</h3><span class="stage-state"><svg class="icon"><use href="#i-check"/></svg><span>Waiting</span></span></article>
+          <article class="stage" data-job="notify" data-status="created"><div class="stage-icon"><svg class="icon"><use href="#i-bell"/></svg></div><h3 class="stage-label">Notify</h3><span class="stage-state"><svg class="icon"><use href="#i-check"/></svg><span>Waiting</span></span></article>
         </div>
       </section>
 
       <div class="detail-grid">
         <section class="panel detail-panel" id="security" aria-labelledby="scan-title">
-          <header class="detail-head"><h2 class="detail-title" id="scan-title">Trivy Scan</h2><div class="detail-meta">Image: app:latest<br>Scanned 2m ago</div></header>
-          <div class="scan-body"><div class="severity-grid"><div class="severity clear"><span>Critical</span><strong>0</strong></div><div class="severity clear"><span>High</span><strong>0</strong></div><div class="severity"><span>Medium</span><strong>0</strong></div><div class="severity low"><span>Low</span><strong>3</strong></div></div><div class="scan-summary"><span class="mini-check"><svg class="icon"><use href="#i-check"/></svg></span><div>No critical or high vulnerabilities<small>Scan completed successfully</small></div></div></div>
+          <header class="detail-head"><h2 class="detail-title" id="scan-title">Trivy Scan</h2><div class="detail-meta" id="scan-meta">Waiting for report</div></header>
+          <div class="scan-body"><div class="severity-grid"><div class="severity clear"><span>Critical</span><strong id="critical-count">—</strong></div><div class="severity clear"><span>High</span><strong id="high-count">—</strong></div><div class="severity"><span>Medium</span><strong id="medium-count">—</strong></div><div class="severity low"><span>Low</span><strong id="low-count">—</strong></div></div><div class="scan-summary"><span class="mini-check"><svg class="icon"><use href="#i-check"/></svg></span><div id="scan-summary">Loading security result<small id="scan-detail">GitLab artifact will appear automatically</small></div></div></div>
         </section>
 
         <section class="panel detail-panel" aria-labelledby="ai-title">
           <header class="detail-head"><h2 class="detail-title" id="ai-title"><svg class="icon"><use href="#i-brain"/></svg>AI Analysis</h2></header>
-          <div class="analysis-body"><div class="analysis-row"><span class="analysis-label">Cause</span><span class="analysis-value"><b>No issues detected</b> in this pipeline.</span></div><div class="analysis-row"><span class="analysis-label">Evidence</span><span class="analysis-value">All checks passed including tests, Trivy scan, and policies.</span></div><div class="analysis-row"><span class="analysis-label">Suggested fix</span><span class="analysis-value">N/A</span></div></div>
+          <div class="analysis-body"><div class="analysis-row"><span class="analysis-label">Cause</span><span class="analysis-value" id="analysis-cause">Loading analysis…</span></div><div class="analysis-row"><span class="analysis-label">Evidence</span><span class="analysis-value" id="analysis-evidence">Waiting for GitLab.</span></div><div class="analysis-row"><span class="analysis-label">Suggested fix</span><span class="analysis-value" id="analysis-fix">—</span></div></div>
         </section>
 
         <section class="panel detail-panel activity-panel" id="activity" aria-labelledby="activity-title">
           <header class="detail-head"><h2 class="detail-title" id="activity-title">Activity</h2><span class="detail-meta">Live log →</span></header>
-          <div class="activity-body"><ol class="activity-list">
-            <li class="activity-item"><span class="activity-check"><svg class="icon"><use href="#i-check"/></svg></span><time class="activity-time">14:27</time><span class="activity-message">Pipeline #25 completed</span></li>
-            <li class="activity-item"><span class="activity-check"><svg class="icon"><use href="#i-check"/></svg></span><time class="activity-time">14:24</time><span class="activity-message">Deployed to production</span></li>
-            <li class="activity-item"><span class="activity-check"><svg class="icon"><use href="#i-check"/></svg></span><time class="activity-time">14:22</time><span class="activity-message">Security scan passed</span></li>
-            <li class="activity-item"><span class="activity-check"><svg class="icon"><use href="#i-check"/></svg></span><time class="activity-time">14:20</time><span class="activity-message">Tests passed (24/24)</span></li>
-            <li class="activity-item"><span class="activity-check"><svg class="icon"><use href="#i-check"/></svg></span><time class="activity-time">14:18</time><span class="activity-message">Build succeeded</span></li>
-            <li class="activity-item"><span class="activity-check"><svg class="icon"><use href="#i-check"/></svg></span><time class="activity-time">14:17</time><span class="activity-message">Pipeline #25 started</span></li>
-          </ol></div>
+          <div class="activity-body"><ol class="activity-list" id="activity-list"><li class="activity-item"><span class="activity-check"><svg class="icon"><use href="#i-check"/></svg></span><time class="activity-time">—</time><span class="activity-message">Loading live activity…</span></li></ol></div>
         </section>
       </div>
     </main>
@@ -344,8 +360,19 @@
     const healthSubtitle = document.querySelector('#health-subtitle');
     const topStatus = document.querySelector('#top-status');
     const servicesCount = document.querySelector('#services-count');
+    const jobsCount = document.querySelector('#jobs-count');
+    const securityStatus = document.querySelector('#security-status');
     const deploymentStatus = document.querySelector('#deployment-status');
+    const pipelineTitle = document.querySelector('#pipeline-title');
     const pipelineResult = document.querySelector('#pipeline-result');
+    const pipelineDuration = document.querySelector('#pipeline-duration');
+    let appIsHealthy = true;
+
+    const statusLabels = {
+      success: 'Passed', failed: 'Failed', running: 'Running', pending: 'Pending',
+      created: 'Waiting', preparing: 'Preparing', manual: 'Manual', skipped: 'Skipped',
+      canceled: 'Canceled', waiting_for_resource: 'Waiting', scheduled: 'Scheduled',
+    };
 
     function updateClock() {
       const now = new Date();
@@ -353,13 +380,13 @@
     }
 
     function setHealth(ok) {
+      appIsHealthy = ok;
       document.body.dataset.health = ok ? 'ok' : 'down';
-      healthTitle.textContent = ok ? 'SYSTEMS HEALTHY' : 'SERVICE DEGRADED';
-      healthSubtitle.textContent = ok ? 'All services running normally' : 'Health endpoint is not responding';
-      topStatus.textContent = ok ? 'All systems operational' : 'Service disruption detected';
-      servicesCount.textContent = ok ? '4 / 4' : '3 / 4';
-      deploymentStatus.textContent = ok ? 'OK' : 'CHECK';
-      pipelineResult.textContent = ok ? 'Succeeded' : 'Attention';
+      if (!ok) {
+        healthTitle.textContent = 'SERVICE DEGRADED';
+        healthSubtitle.textContent = 'Application health endpoint is not responding';
+        topStatus.textContent = 'Service disruption detected';
+      }
     }
 
     async function checkHealth() {
@@ -368,6 +395,121 @@
         const data = await response.json();
         setHealth(response.ok && data.status === 'ok');
       } catch (_) { setHealth(false); }
+    }
+
+    function formatDuration(seconds) {
+      if (!Number.isFinite(seconds)) return '—';
+      const minutes = Math.floor(seconds / 60);
+      const remainder = Math.round(seconds % 60);
+      return minutes ? `${minutes}m ${String(remainder).padStart(2, '0')}s` : `${remainder}s`;
+    }
+
+    function formatTime(value) {
+      if (!value) return '—';
+      return new Date(value).toLocaleTimeString('en-GB', {
+        hour: '2-digit', minute: '2-digit', hour12: false,
+      });
+    }
+
+    function findJob(jobs, name) {
+      return name === 'notify'
+        ? jobs.find((job) => job.name.startsWith('notify_'))
+        : jobs.find((job) => job.name === name);
+    }
+
+    function renderStages(jobs) {
+      document.querySelectorAll('.stage[data-job]').forEach((stage) => {
+        const job = findJob(jobs, stage.dataset.job);
+        const status = job?.status ?? 'created';
+        stage.dataset.status = status;
+        stage.querySelector('.stage-state span').textContent = statusLabels[status] ?? status;
+        stage.title = job ? `${job.name} · ${formatDuration(job.duration)}` : 'Job not created yet';
+      });
+    }
+
+    function renderSecurity(security) {
+      const values = security?.counts ?? {};
+      for (const severity of ['critical', 'high', 'medium', 'low']) {
+        document.querySelector(`#${severity}-count`).textContent = Number.isFinite(values[severity]) ? values[severity] : '—';
+      }
+      const status = security?.status ?? 'created';
+      securityStatus.textContent = status === 'success' ? 'OK' : (statusLabels[status] ?? status).toUpperCase();
+      document.querySelector('#scan-meta').textContent = security?.scannedAt
+        ? `Updated ${formatTime(security.scannedAt)}`
+        : 'Waiting for security job';
+      document.querySelector('#scan-summary').childNodes[0].textContent = status === 'success'
+        ? 'Security scan passed'
+        : `Security scan ${statusLabels[status]?.toLowerCase() ?? status}`;
+      document.querySelector('#scan-detail').textContent = security?.reportAvailable
+        ? 'Counts loaded from the Trivy JSON artifact'
+        : (status === 'success' ? 'No unfixed HIGH or CRITICAL vulnerabilities' : 'Live GitLab job status');
+    }
+
+    function renderActivity(items) {
+      const list = document.querySelector('#activity-list');
+      list.replaceChildren(...items.map((item) => {
+        const row = document.createElement('li');
+        row.className = 'activity-item';
+        row.dataset.status = item.status;
+        const mark = document.createElement('span');
+        mark.className = 'activity-check';
+        mark.innerHTML = '<svg class="icon"><use href="#i-check"/></svg>';
+        const time = document.createElement('time');
+        time.className = 'activity-time';
+        time.textContent = formatTime(item.time);
+        const message = document.createElement('span');
+        message.className = 'activity-message';
+        message.textContent = item.message;
+        row.append(mark, time, message);
+        return row;
+      }));
+    }
+
+    function renderDashboard(data) {
+      const pipeline = data.pipeline;
+      const status = pipeline.status;
+      const running = ['running', 'pending', 'created', 'preparing', 'waiting_for_resource'].includes(status);
+      document.body.dataset.pipeline = status === 'failed' ? 'failed' : (running ? 'running' : status);
+      pipelineTitle.textContent = `Pipeline #${pipeline.iid}`;
+      pipelineResult.textContent = statusLabels[status] ?? status;
+      pipelineDuration.textContent = formatDuration(pipeline.duration);
+      servicesCount.textContent = `${data.system.services.healthy} / ${data.system.services.total}`;
+      jobsCount.textContent = `${pipeline.completedJobs} / ${pipeline.totalJobs}`;
+      deploymentStatus.textContent = (statusLabels[data.deployment.status] ?? data.deployment.status).toUpperCase();
+      renderStages(pipeline.jobs);
+      renderSecurity(data.security);
+      document.querySelector('#analysis-cause').textContent = data.analysis.cause;
+      document.querySelector('#analysis-evidence').textContent = data.analysis.evidence;
+      document.querySelector('#analysis-fix').textContent = data.analysis.suggestedFix;
+      renderActivity(data.activity);
+
+      if (!appIsHealthy) return;
+      if (status === 'success') {
+        healthTitle.textContent = 'SYSTEMS HEALTHY';
+        healthSubtitle.textContent = `Pipeline #${pipeline.iid} completed successfully`;
+        topStatus.textContent = `Live GitLab · ${data.system.runners.online} runner online`;
+      } else if (running) {
+        healthTitle.textContent = 'PIPELINE RUNNING';
+        healthSubtitle.textContent = `Watching ${pipeline.completedJobs} of ${pipeline.totalJobs} jobs`;
+        topStatus.textContent = `Live GitLab · Pipeline #${pipeline.iid} in progress`;
+      } else {
+        healthTitle.textContent = 'PIPELINE ATTENTION';
+        healthSubtitle.textContent = `Pipeline #${pipeline.iid} is ${status}`;
+        topStatus.textContent = `Live GitLab · Action may be required`;
+      }
+    }
+
+    function showDashboardUnavailable() {
+      topStatus.textContent = 'GitLab data temporarily unavailable';
+      healthSubtitle.textContent = 'Application is online · reconnecting to GitLab';
+    }
+
+    async function refreshDashboard() {
+      try {
+        const response = await fetch('/api/dashboard', { cache: 'no-store' });
+        if (!response.ok) throw new Error('dashboard unavailable');
+        renderDashboard(await response.json());
+      } catch (_) { showDashboardUnavailable(); }
     }
 
     document.querySelectorAll('.nav-button').forEach((button) => {
@@ -380,8 +522,10 @@
 
     updateClock();
     checkHealth();
+    refreshDashboard();
     setInterval(updateClock, 1000);
     setInterval(checkHealth, 10000);
+    setInterval(refreshDashboard, 15000);
   </script>
 </body>
 </html>
