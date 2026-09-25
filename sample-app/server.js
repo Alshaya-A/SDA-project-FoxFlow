@@ -77,6 +77,14 @@ function publicJob(job) {
   };
 }
 
+function pipelineRunners(jobs) {
+  const runners = new Map();
+  for (const job of jobs) {
+    if (job.runner?.id) runners.set(job.runner.id, job.runner);
+  }
+  return [...runners.values()];
+}
+
 function pipelineActivity(pipeline, jobs) {
   const labels = {
     build: 'Container image build',
@@ -214,19 +222,23 @@ async function loadDashboard() {
   if (!pipelines.length) throw new Error('No GitLab pipelines were returned');
 
   const latestPipeline = pipelines[0];
-  const [pipeline, rawJobs, runners] = await Promise.all([
+  const [pipeline, rawJobs] = await Promise.all([
     gitLabGet(`/projects/${projectId}/pipelines/${latestPipeline.id}`),
     gitLabGet(`/projects/${projectId}/pipelines/${latestPipeline.id}/jobs?include_retried=false&per_page=100`),
-    gitLabGet(`/projects/${projectId}/runners?per_page=100`),
   ]);
   const jobs = latestJobs(rawJobs);
+  // Reporter tokens cannot call the project runners endpoint. GitLab includes
+  // the runner's public status on each job, which is enough for this dashboard.
+  const runners = pipelineRunners(jobs);
   const securityJob = jobs.find((job) => job.name === 'security_scan');
   const deployJob = jobs.find((job) => job.name === 'deploy');
   const [security, analysis] = await Promise.all([
     vulnerabilitySummary(securityJob),
     pipelineAnalysis(pipeline, jobs),
   ]);
-  const onlineRunners = runners.filter((runner) => runner.status === 'online').length;
+  const onlineRunners = runners.filter(
+    (runner) => runner.online === true || runner.status === 'online',
+  ).length;
   const completedJobs = jobs.filter((job) => job.status === 'success' || job.status === 'skipped').length;
 
   return {

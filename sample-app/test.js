@@ -83,6 +83,7 @@ test('GET /api/dashboard returns a sanitized live pipeline summary', async () =>
     started_at: `2026-09-25T10:0${index}:00Z`,
     finished_at: `2026-09-25T10:0${index + 1}:00Z`,
     web_url: `http://gitlab.test/jobs/${200 + index}`,
+    runner: { id: 1, status: 'online', online: true },
   }));
 
   global.fetch = async (url, options) => {
@@ -92,7 +93,6 @@ test('GET /api/dashboard returns a sanitized live pipeline summary', async () =>
     else if (url.includes('/pipelines?')) value = [pipeline];
     else if (url.endsWith('/pipelines/101')) value = pipeline;
     else if (url.includes('/pipelines/101/jobs')) value = jobs;
-    else if (url.includes('/runners?')) value = [{ id: 1, status: 'online' }];
     else if (url.endsWith('/artifacts/trivy-report.json')) value = { Results: [{ Vulnerabilities: [{ Severity: 'LOW' }] }] };
     else throw new Error(`Unexpected GitLab request: ${url}`);
     return new Response(JSON.stringify(value), { status: 200 });
