@@ -8,14 +8,15 @@ application deployed automatically after build, test, and security gates pass.
 
 - GitLab: `http://20.127.65.116:8080`
 - Application: `http://20.127.65.116:3000`
+- Operations dashboard: `http://20.127.65.116:3000/dashboard`
 - Health endpoint: `http://20.127.65.116:3000/health`
 - Live dashboard API: `http://20.127.65.116:3000/api/dashboard`
 
-The application home page is a live operations dashboard. It reads the latest
-GitLab pipeline, jobs, Runner availability, deployment result, Trivy artifact,
-AI failure summary, and activity through a server-side API. The protected
-`GITLAB_API_TOKEN` remains inside the application container and is never sent to
-the browser.
+The application home page and the live operations dashboard are separate pages
+inside the same service. The dashboard reads the latest GitLab pipeline, jobs,
+Runner availability, deployment result, Trivy artifact, AI failure summary, and
+activity through a server-side API. The protected `GITLAB_API_TOKEN` remains
+inside the application container and is never sent to the browser.
 
 ## Committee failure demo
 

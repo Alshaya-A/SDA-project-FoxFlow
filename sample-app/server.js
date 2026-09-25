@@ -8,6 +8,7 @@ const path = require('path');
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const INDEX_HTML = fs.readFileSync(path.join(PUBLIC_DIR, 'index.html'));
+const DASHBOARD_HTML = fs.readFileSync(path.join(PUBLIC_DIR, 'dashboard.html'));
 
 // The exact health payload is a shared CI contract. Do not change it.
 const HEALTH_BODY = JSON.stringify({ status: 'ok', service: 'foxflow-sample' });
@@ -338,6 +339,12 @@ const server = http.createServer(async (req, res) => {
   if (req.url === '/' || req.url === '/index.html') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(INDEX_HTML);
+    return;
+  }
+
+  if (req.url === '/dashboard' || req.url === '/dashboard/') {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(DASHBOARD_HTML);
     return;
   }
 

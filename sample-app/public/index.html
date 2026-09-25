@@ -1,531 +1,266 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#061126">
-  <meta name="description" content="FoxFlow CI/CD control room dashboard">
-  <title>FoxFlow Control Room</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080c12">
+  <meta name="description" content="FoxFlow sample application running on the internal CI/CD pipeline">
+  <title>FoxFlow | Internal CI/CD Platform</title>
   <style>
     :root {
-      color-scheme: dark;
-      --bg: #050d1d;
-      --bg-deep: #030918;
-      --panel: rgba(8, 23, 51, .88);
-      --panel-2: rgba(11, 31, 66, .76);
-      --line: #244f8b;
-      --line-soft: rgba(53, 102, 161, .42);
-      --text: #edf5ff;
-      --muted: #8fb8ee;
-      --mint: #66f0b5;
-      --mint-soft: rgba(102, 240, 181, .16);
-      --danger: #ff657d;
-      --font: "SFMono-Regular", "Cascadia Code", "Roboto Mono", Consolas, monospace;
-      --shadow: 0 18px 50px rgba(0, 0, 0, .28);
+      --ink: #070a0f;
+      --navy: #070c13;
+      --cyan: #3ebbd7;
+      --mint: #9cefd2;
+      --green: #49d892;
+      --yellow: #ffd53b;
+      --peach: #ffe7df;
+      --muted: #c0cada;
+      --line: 4px solid var(--ink);
     }
 
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+
+    html, body { min-height: 100%; }
+
     body {
-      min-width: 320px;
-      min-height: 100vh;
       margin: 0;
-      color: var(--text);
-      background:
-        radial-gradient(circle at 72% -8%, rgba(31, 76, 145, .23), transparent 34%),
-        linear-gradient(rgba(55, 96, 153, .035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(55, 96, 153, .035) 1px, transparent 1px),
-        var(--bg-deep);
-      background-size: auto, 36px 36px, 36px 36px, auto;
-      font-family: var(--font);
-      letter-spacing: .02em;
-    }
-    button { font: inherit; }
-    svg { display: block; }
-    .icon { width: 1.45rem; height: 1.45rem; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-
-    .dashboard { min-height: 100vh; display: grid; grid-template-columns: 260px minmax(0, 1fr); }
-    .sidebar {
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding: 30px 16px 22px;
-      border-right: 2px solid rgba(38, 81, 139, .5);
-      background: linear-gradient(180deg, rgba(8, 25, 57, .98), rgba(4, 13, 30, .96));
-    }
-
-    .brand { display: grid; place-items: center; padding: 0 8px 28px; text-align: center; }
-    .brand-logo { width: 166px; height: 155px; filter: drop-shadow(0 12px 22px rgba(0,0,0,.32)); }
-    .brand-name {
-      margin: 9px 0 0;
-      font-size: 2.05rem;
-      font-weight: 1000;
-      line-height: .95;
-      letter-spacing: .05em;
-      text-shadow: 4px 4px 0 rgba(44, 93, 151, .34);
-    }
-    .brand-tag { margin: 10px 0 0; color: var(--muted); font-size: .77rem; font-weight: 800; letter-spacing: .34em; }
-
-    .nav { display: grid; gap: 10px; margin-top: 12px; }
-    .nav-button {
-      position: relative;
-      width: 100%;
-      min-height: 64px;
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      padding: 0 20px;
-      color: #a7c8f4;
-      border: 0;
-      border-radius: 7px;
-      background: transparent;
-      cursor: pointer;
-      font-size: .86rem;
-      font-weight: 800;
-      letter-spacing: .08em;
-      text-align: left;
-      text-transform: uppercase;
-      transition: color .18s ease, background .18s ease, transform .18s ease;
-    }
-    .nav-button:hover { color: var(--text); background: rgba(33, 68, 120, .36); transform: translateX(2px); }
-    .nav-button.active { color: var(--text); background: linear-gradient(90deg, rgba(44, 92, 160, .66), rgba(31, 65, 116, .38)); }
-    .nav-button.active::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 5px; border-radius: 4px; background: var(--mint); box-shadow: 0 0 18px rgba(102, 240, 181, .45); }
-    .nav-button .icon { width: 27px; height: 27px; }
-    .sidebar-foot { margin-top: auto; padding: 18px 14px 0; color: #547cac; font-size: .67rem; letter-spacing: .14em; line-height: 1.7; text-transform: uppercase; }
-
-    .main { min-width: 0; padding: 28px 26px 30px; }
-    .topbar { min-height: 34px; display: flex; justify-content: flex-end; align-items: center; gap: 15px; margin-bottom: 22px; color: var(--muted); font-size: .74rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-    .live-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 15px rgba(102, 240, 181, .8); animation: pulse 2.2s infinite; }
-    .topbar-divider { width: 1px; height: 17px; background: var(--line); }
-
-    .panel { border: 2px solid var(--line); border-radius: 9px; background: linear-gradient(145deg, rgba(10, 29, 64, .92), rgba(4, 14, 33, .95)); box-shadow: var(--shadow); overflow: hidden; }
-    .overview-panel {
-      min-height: 205px;
+      padding: clamp(14px, 2vw, 28px);
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 286px;
+      place-items: center;
+      color: white;
+      background:
+        linear-gradient(rgba(57, 71, 87, .1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(57, 71, 87, .1) 1px, transparent 1px),
+        #e2e6e9;
+      background-size: 68px 68px;
+      font-family: "Courier New", Courier, monospace;
+    }
+
+    .app {
+      width: min(1420px, 100%);
+      min-height: min(900px, calc(100vh - 40px));
+      display: grid;
+      grid-template-rows: 86px 1fr auto;
+      border: var(--line);
+      background: var(--navy);
+      box-shadow: 14px 14px 0 rgba(7, 10, 15, .9);
+      overflow: hidden;
+    }
+
+    .titlebar {
+      display: flex;
       align-items: center;
-      padding: 28px 30px;
-      border-color: var(--mint);
-      box-shadow: inset 0 0 40px rgba(41, 115, 97, .04), var(--shadow);
+      justify-content: space-between;
+      gap: 20px;
+      padding: 0 26px;
+      color: var(--ink);
+      border-bottom: var(--line);
+      background: var(--cyan);
+      font-size: clamp(1rem, 2vw, 1.7rem);
+      font-weight: 900;
+      font-style: italic;
+      text-transform: uppercase;
     }
-    .health-main { min-width: 0; display: flex; align-items: center; gap: 34px; }
-    .health-check { flex: 0 0 auto; width: 130px; height: 130px; display: grid; place-items: center; border-radius: 50%; color: #07162b; background: var(--mint); box-shadow: 0 0 28px rgba(102, 240, 181, .17); }
-    .health-check .icon { width: 73px; height: 73px; stroke-width: 2.7; }
-    .health-copy { min-width: 0; }
-    .health-title { margin: 0; font-size: clamp(2.25rem, 4.4vw, 4.45rem); font-weight: 1000; line-height: .92; letter-spacing: .025em; text-shadow: 5px 5px 0 rgba(66, 104, 159, .3); }
-    .health-subtitle { margin: 15px 0 0; color: var(--muted); font-size: clamp(.77rem, 1.35vw, 1.2rem); font-weight: 700; letter-spacing: .26em; text-transform: uppercase; }
-    .health-metrics { display: grid; grid-template-columns: 1fr auto; gap: 17px 24px; align-content: center; padding: 8px 10px 8px 30px; border-left: 2px solid var(--line); font-size: .83rem; letter-spacing: .09em; text-transform: uppercase; }
-    .health-metrics span:nth-child(odd) { color: var(--muted); }
-    .health-metrics strong { color: var(--mint); font-size: 1.18rem; text-align: right; }
 
-    .pipeline-panel { margin-top: 20px; }
-    .section-head { min-height: 62px; display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 0 24px; border-bottom: 1px solid var(--line-soft); background: rgba(30, 62, 111, .18); }
-    .section-title { margin: 0; font-size: 1.2rem; font-weight: 1000; letter-spacing: .05em; text-transform: uppercase; }
-    .pipeline-result { display: flex; align-items: center; gap: 12px; color: var(--mint); font-size: .8rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
-    .result-check { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; color: #07162b; background: var(--mint); }
-    .result-check .icon { width: 17px; height: 17px; stroke-width: 2.8; }
-    .result-separator { color: #73a7e2; }
-
-    .stages { display: grid; grid-template-columns: repeat(5, 1fr); padding: 25px 30px 20px; }
-    .stage { position: relative; display: grid; place-items: center; min-width: 0; text-align: center; }
-    .stage:not(:last-child)::after { content: ""; position: absolute; top: 34px; left: calc(50% + 42px); width: calc(100% - 84px); height: 3px; background: var(--mint); box-shadow: 0 0 10px rgba(102, 240, 181, .25); }
-    .stage-icon { position: relative; z-index: 1; width: 68px; height: 68px; display: grid; place-items: center; border-radius: 50%; color: #07162b; background: var(--mint); }
-    .stage-icon .icon { width: 35px; height: 35px; stroke-width: 2.3; }
-    .stage-label { margin: 12px 0 8px; font-size: .8rem; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
-    .stage-state { min-width: 120px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 7px 12px; color: var(--mint); border: 1px solid #2d659b; border-radius: 4px; background: rgba(14, 40, 74, .58); font-size: .66rem; font-weight: 800; text-transform: uppercase; }
-    .stage-state .icon { width: 16px; height: 16px; stroke-width: 2.5; }
-    .stage[data-status="failed"] .stage-icon,
-    .stage[data-status="canceled"] .stage-icon { background: var(--danger); }
-    .stage[data-status="failed"] .stage-state,
-    .stage[data-status="canceled"] .stage-state { color: var(--danger); border-color: rgba(255, 101, 125, .55); }
-    .stage[data-status="running"] .stage-icon,
-    .stage[data-status="pending"] .stage-icon { background: #ffd166; animation: pulse 1.25s infinite; }
-    .stage[data-status="running"] .stage-state,
-    .stage[data-status="pending"] .stage-state { color: #ffd166; border-color: rgba(255, 209, 102, .55); }
-    .stage[data-status="created"] .stage-icon,
-    .stage[data-status="manual"] .stage-icon,
-    .stage[data-status="skipped"] .stage-icon { color: #59708f; background: #9aabc2; }
-    .stage[data-status="created"] .stage-state,
-    .stage[data-status="manual"] .stage-state,
-    .stage[data-status="skipped"] .stage-state { color: #9aabc2; }
-    body[data-pipeline="failed"] .overview-panel { border-color: var(--danger); }
-    body[data-pipeline="failed"] .result-check { background: var(--danger); }
-    body[data-pipeline="running"] .result-check { background: #ffd166; animation: pulse 1.25s infinite; }
-    body[data-pipeline="failed"] .pipeline-result { color: var(--danger); }
-    body[data-pipeline="running"] .pipeline-result { color: #ffd166; }
-
-    .detail-grid { display: grid; grid-template-columns: 1.22fr .92fr .98fr; gap: 15px; margin-top: 16px; }
-    .detail-panel { min-height: 280px; }
-    .detail-head { min-height: 58px; display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 0 20px; border-bottom: 1px solid var(--line-soft); }
-    .detail-title { display: flex; align-items: center; gap: 12px; margin: 0; font-size: 1.05rem; font-weight: 1000; letter-spacing: .04em; text-transform: uppercase; }
-    .detail-title .icon { color: #c6dcff; }
-    .detail-meta { color: var(--muted); font-size: .65rem; line-height: 1.5; text-align: right; }
-
-    .scan-body { padding: 18px; }
-    .severity-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-    .severity { min-height: 90px; display: grid; align-content: center; justify-items: center; gap: 8px; border: 1px solid #265185; border-radius: 4px; background: rgba(10, 31, 63, .52); }
-    .severity span { color: #afccf3; font-size: .61rem; text-transform: uppercase; }
-    .severity strong { font-size: 2rem; line-height: 1; }
-    .severity.clear strong { color: var(--mint); }
-    .severity.low strong { color: #a9cce7; }
-    .scan-summary { display: flex; align-items: center; gap: 13px; margin-top: 17px; font-size: .68rem; line-height: 1.55; }
-    .mini-check { flex: 0 0 auto; width: 27px; height: 27px; display: grid; place-items: center; border-radius: 50%; color: #07162b; background: var(--mint); }
-    .mini-check .icon { width: 16px; height: 16px; stroke-width: 2.7; }
-    .scan-summary small { display: block; color: var(--muted); font-size: .62rem; }
-
-    .analysis-body { display: grid; gap: 12px; padding: 16px 18px; }
-    .analysis-row { display: grid; grid-template-columns: 108px 1fr; align-items: start; gap: 12px; font-size: .66rem; line-height: 1.45; }
-    .analysis-label { padding: 9px 10px; color: #c8dbfb; border-radius: 4px; background: rgba(34, 74, 132, .55); }
-    .analysis-value { padding-top: 8px; color: #d8e7fb; }
-    .analysis-value b { color: var(--mint); }
-
-    .activity-body { padding: 10px 18px 16px; }
-    .activity-list { margin: 0; padding: 0; list-style: none; }
-    .activity-item { display: grid; grid-template-columns: 19px 50px 1fr; gap: 10px; align-items: center; min-height: 30px; border-bottom: 1px solid rgba(51, 92, 145, .32); font-size: .64rem; }
-    .activity-item:last-child { border-bottom: 0; }
-    .activity-check { width: 16px; height: 16px; display: grid; place-items: center; border-radius: 50%; color: #07162b; background: var(--mint); }
-    .activity-check .icon { width: 10px; height: 10px; stroke-width: 2.8; }
-    .activity-item[data-status="failed"] .activity-check,
-    .activity-item[data-status="canceled"] .activity-check { background: var(--danger); }
-    .activity-item[data-status="running"] .activity-check,
-    .activity-item[data-status="pending"] .activity-check { background: #ffd166; }
-    .activity-time { color: var(--muted); }
-    .activity-message { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-    body[data-health="down"] .live-dot,
-    body[data-health="down"] .health-check,
-    body[data-health="down"] .result-check { background: var(--danger); }
-    body[data-health="down"] .overview-panel { border-color: var(--danger); }
-    body[data-health="down"] .health-check .icon { transform: rotate(45deg); }
-
-    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .55; transform: scale(.82); } }
-
-    @media (max-width: 1180px) {
-      .dashboard { grid-template-columns: 215px minmax(0, 1fr); }
-      .sidebar { padding-inline: 10px; }
-      .brand-logo { width: 138px; height: 128px; }
-      .brand-name { font-size: 1.65rem; }
-      .nav-button { padding-inline: 16px; gap: 13px; font-size: .75rem; }
-      .main { padding-inline: 18px; }
-      .overview-panel { grid-template-columns: minmax(0, 1fr) 230px; padding-inline: 24px; }
-      .health-check { width: 105px; height: 105px; }
-      .health-check .icon { width: 58px; height: 58px; }
-      .health-main { gap: 24px; }
-      .detail-grid { grid-template-columns: 1.2fr 1fr; }
-      .activity-panel { grid-column: 1 / -1; min-height: auto; }
-      .activity-list { display: grid; grid-template-columns: 1fr 1fr; column-gap: 25px; }
+    .controls { display: flex; gap: 12px; }
+    .controls span {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border: var(--line);
+      background: white;
+      font-family: Arial, sans-serif;
+      font-size: 1.35rem;
+      font-style: normal;
+      line-height: 1;
     }
+
+    .hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(330px, .85fr);
+      align-items: center;
+      gap: clamp(30px, 5vw, 80px);
+      padding: clamp(45px, 7vw, 96px) clamp(42px, 6vw, 90px);
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -4%;
+      bottom: -24%;
+      width: 55%;
+      height: 65%;
+      border-left: 15px solid rgba(62, 187, 215, .12);
+      transform: skewX(-45deg);
+      pointer-events: none;
+    }
+
+    .copy, .visual { position: relative; z-index: 1; }
+
+    .kicker {
+      margin: 0 0 30px;
+      color: var(--yellow);
+      font-size: clamp(.9rem, 1.6vw, 1.3rem);
+      font-weight: 900;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .kicker::before { content: ">"; margin-right: 16px; color: var(--green); font-size: 1.7em; }
+
+    h1 {
+      margin: 0;
+      color: var(--mint);
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      font-size: clamp(5rem, 10vw, 9rem);
+      letter-spacing: .02em;
+      line-height: .86;
+      text-transform: uppercase;
+      text-shadow: 11px 11px 0 #173b47;
+    }
+
+    .subtitle {
+      max-width: 720px;
+      margin: 48px 0 0;
+      font-size: clamp(1rem, 2vw, 1.55rem);
+      font-weight: 900;
+      letter-spacing: .06em;
+      line-height: 1.55;
+      text-transform: uppercase;
+    }
+
+    .description {
+      max-width: 700px;
+      margin: 34px 0 0;
+      color: var(--muted);
+      font-family: Arial, sans-serif;
+      font-size: clamp(1rem, 1.7vw, 1.4rem);
+      line-height: 1.7;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 34px;
+    }
+
+    .meta span {
+      padding: 8px 12px;
+      color: #eaf4f7;
+      border: 2px solid #345063;
+      background: #101c27;
+      font-size: .78rem;
+      font-weight: 800;
+    }
+
+    .meta b { color: var(--green); }
+
+    .dashboard-link {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 12px 18px;
+      color: var(--ink);
+      border: var(--line);
+      background: var(--green);
+      box-shadow: 6px 6px 0 #173b47;
+      font-weight: 900;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    .dashboard-link:hover,
+    .dashboard-link:focus-visible { transform: translate(2px, 2px); box-shadow: 4px 4px 0 #173b47; }
+
+    .visual { display: grid; place-items: center; }
+    .orbit { position: relative; width: min(440px, 100%); aspect-ratio: 1; display: grid; place-items: center; }
+    .orbit::before { content: ""; position: absolute; inset: 4%; border: 4px dashed rgba(62, 187, 215, .52); border-radius: 50%; }
+    .logo { width: 90%; image-rendering: pixelated; filter: drop-shadow(16px 17px 0 rgba(34, 87, 101, .5)); }
+
+    .loading {
+      min-height: 94px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
+      padding: 20px 34px;
+      color: var(--ink);
+      border-top: var(--line);
+      background: var(--peach);
+      font-size: clamp(.78rem, 1.6vw, 1.15rem);
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .bar { width: min(520px, 48%); display: grid; grid-template-columns: repeat(10, 1fr); gap: 7px; }
+    .bar i { height: 28px; border: 4px solid var(--ink); background: var(--green); }
+    .bar i:nth-last-child(-n+2) { background: transparent; }
 
     @media (max-width: 850px) {
-      .dashboard { display: block; }
-      .sidebar { position: relative; width: 100%; height: auto; padding: 15px 14px 11px; border-right: 0; border-bottom: 2px solid rgba(38, 81, 139, .5); }
-      .brand { display: flex; justify-content: flex-start; gap: 13px; padding: 0 4px 13px; text-align: left; }
-      .brand-logo { width: 58px; height: 54px; }
-      .brand-name { margin: 0; font-size: 1.2rem; }
-      .brand-tag { margin-top: 4px; font-size: .54rem; }
-      .nav { grid-template-columns: repeat(5, minmax(108px, 1fr)); gap: 7px; overflow-x: auto; padding-bottom: 3px; }
-      .nav-button { min-height: 44px; justify-content: center; gap: 8px; padding: 0 10px; font-size: .62rem; white-space: nowrap; }
-      .nav-button .icon { width: 18px; height: 18px; }
-      .nav-button.active::before { inset: auto 8px 0; width: auto; height: 3px; }
-      .sidebar-foot { display: none; }
-      .main { padding: 18px 14px 24px; }
-      .topbar { justify-content: center; margin-bottom: 14px; font-size: .62rem; }
-      .overview-panel { grid-template-columns: 1fr; padding: 25px 21px; }
-      .health-main { justify-content: center; }
-      .health-metrics { grid-template-columns: repeat(4, auto); margin-top: 24px; padding: 18px 0 0; border-top: 1px solid var(--line); border-left: 0; }
-      .health-metrics span { display: none; }
-      .health-metrics strong { text-align: center; }
-      .stages { grid-template-columns: 1fr; gap: 12px; padding-inline: 22px; }
-      .stage { grid-template-columns: 52px 1fr 105px; gap: 13px; text-align: left; }
-      .stage:not(:last-child)::after { top: 47px; left: 25px; width: 2px; height: 26px; }
-      .stage-icon { width: 50px; height: 50px; }
-      .stage-icon .icon { width: 26px; height: 26px; }
-      .stage-label { justify-self: start; margin: 0; }
-      .stage-state { min-width: 105px; }
-      .detail-grid { grid-template-columns: 1fr; }
-      .activity-panel { grid-column: auto; }
+      body { display: block; padding: 10px; }
+      .app { min-height: calc(100vh - 20px); grid-template-rows: 64px 1fr auto; box-shadow: 7px 7px 0 var(--ink); }
+      .titlebar { padding: 0 14px; }
+      .controls { gap: 6px; }
+      .controls span { width: 28px; height: 28px; border-width: 3px; font-size: 1rem; }
+      .hero { grid-template-columns: 1fr; gap: 34px; padding: 42px 28px; text-align: center; }
+      .kicker { margin-bottom: 24px; }
+      .kicker::before { margin-right: 8px; }
+      h1 { font-size: clamp(4.2rem, 22vw, 7rem); }
+      .subtitle { margin-top: 38px; }
+      .description { margin: 24px auto 0; }
+      .meta { justify-content: center; }
+      .orbit { width: min(320px, 88vw); }
+      .loading { align-items: flex-start; flex-direction: column; gap: 14px; padding: 18px 22px; }
+      .bar { width: 100%; }
+      .bar i { height: 20px; border-width: 3px; }
     }
 
-    @media (max-width: 540px) {
-      .topbar-divider, #clock-date { display: none; }
-      .health-main { display: grid; justify-items: center; gap: 17px; text-align: center; }
-      .health-check { width: 88px; height: 88px; }
-      .health-check .icon { width: 48px; height: 48px; }
-      .health-title { font-size: 2.3rem; }
-      .health-subtitle { font-size: .63rem; letter-spacing: .14em; }
-      .health-metrics { gap: 10px; }
-      .health-metrics strong { font-size: .8rem; }
-      .section-head { padding-inline: 15px; }
-      .pipeline-result { font-size: .61rem; }
-      .result-separator, .duration { display: none; }
-      .stage { grid-template-columns: 46px 1fr 88px; gap: 9px; }
-      .stage-icon { width: 44px; height: 44px; }
-      .stage-state { min-width: 88px; padding-inline: 6px; font-size: .56rem; }
-      .severity-grid { grid-template-columns: 1fr 1fr; }
-      .activity-list { grid-template-columns: 1fr; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
-    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   </style>
 </head>
-<body data-health="ok">
-  <svg aria-hidden="true" width="0" height="0" style="position:absolute">
-    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
-    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></symbol>
-    <symbol id="i-pipeline" viewBox="0 0 24 24"><circle cx="5" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 5h4a3 3 0 0 1 3 3v1M7 19h4a3 3 0 0 0 3-3v-1M14 12h3M5 7v10"/></symbol>
-    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 20 6v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6Z"/></symbol>
-    <symbol id="i-box" viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></symbol>
-    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 8h18c0-1-3-1-3-8M10 21h4"/></symbol>
-    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08A1.7 1.7 0 0 0 8.97 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15 1.7 1.7 0 0 0 3.08 14H3v-4h.08A1.7 1.7 0 0 0 4.6 8.97a1.7 1.7 0 0 0-.34-1.88L4.2 7.03 7.03 4.2l.06.06A1.7 1.7 0 0 0 8.97 4.6 1.7 1.7 0 0 0 10 3.08V3h4v.08a1.7 1.7 0 0 0 1.03 1.52 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06a1.7 1.7 0 0 0-.34 1.88A1.7 1.7 0 0 0 20.92 10H21v4h-.08A1.7 1.7 0 0 0 19.4 15Z"/></symbol>
-    <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.75 3h10.5A2 2 0 0 0 19 18l-5-9V3M8 14h8"/></symbol>
-    <symbol id="i-brain" viewBox="0 0 24 24"><path d="M9.5 4.5A3 3 0 0 0 4 6a3 3 0 0 0 .5 5.5A3 3 0 0 0 7 17a3 3 0 0 0 5 2V5a3 3 0 0 0-2.5-.5ZM14.5 4.5A3 3 0 0 1 20 6a3 3 0 0 1-.5 5.5A3 3 0 0 1 17 17a3 3 0 0 1-5 2V5a3 3 0 0 1 2.5-.5Z"/><path d="M7 9h2M15 9h2M7 14h2M15 14h2"/></symbol>
-  </svg>
+<body>
+  <main class="app">
+    <header class="titlebar">
+      <span>foxflow_platform.exe</span>
+      <div class="controls" aria-hidden="true"><span>−</span><span>□</span><span>×</span></div>
+    </header>
 
-  <div class="dashboard">
-    <aside class="sidebar" aria-label="Main navigation">
-      <div class="brand">
-        <svg class="brand-logo" viewBox="0 0 336 314" role="img" aria-label="FoxFlow pixel fox logo" shape-rendering="crispEdges">
-          <path d="M116 1h104v25h9v31h-9v10h16v34H100V67h16V57h-9V26h9Z" fill="#27396d" stroke="#070d2a" stroke-width="8"/><path d="M112 28h112M104 63h128" stroke="#070d2a" stroke-width="8"/><rect x="126" y="11" width="10" height="9" fill="#54e49a"/><rect x="147" y="11" width="10" height="9" fill="#ffd739"/><rect x="183" y="11" width="10" height="9" fill="#101a38"/><rect x="204" y="11" width="10" height="9" fill="#101a38"/><rect x="126" y="39" width="10" height="9" fill="#54e49a"/><rect x="147" y="39" width="10" height="9" fill="#ffd739"/>
-          <path d="M82 82h172v9h27v14h18v15h16v22h12v44h-12v20h-17v15h-23v12H61v-12H38v-15H21v-20H9v-44h12v-22h16v-15h18V91h27Z" fill="#dff5ff" stroke="#070d2a" stroke-width="8"/><path d="M14 166h21v19h18v12h25v11h179v-11h25v-12h18v-19h22v20h-12v20h-17v15h-23v9H66v-9H43v-15H26v-20H14Z" fill="#8fd0ff"/>
-          <path d="M93 111h15V79h17l35 38h16l35-38h17v32h15v65h-15v19h-18v15h-20v14h-44v-14h-20v-15h-18v-19H93Z" fill="#ff6317" stroke="#070d2a" stroke-width="8"/><path d="m102 162 66 58 66-58v24h-18v18h-21v15h-54v-15h-21v-18h-18Z" fill="#ffae24"/><rect x="115" y="148" width="16" height="19" fill="#070d2a"/><rect x="205" y="148" width="16" height="19" fill="#070d2a"/><rect x="157" y="177" width="10" height="10" fill="#070d2a"/><rect x="167" y="182" width="10" height="10" fill="#070d2a"/><rect x="177" y="177" width="10" height="10" fill="#070d2a"/>
-          <path d="M43 249h11v-10h28v10h11v11h9v28h-9v11H82v9H54v-9H43v-11h-9v-28h9Z" fill="#347ff2" stroke="#070d2a" stroke-width="7"/><path d="m61 267-9 8 9 8m19-16 9 8-9 8m-6-22-10 28" fill="none" stroke="#fff" stroke-width="6"/><path d="M140 249h11v-10h34v10h11v11h9v28h-9v11h-11v9h-34v-9h-11v-11h-9v-28h9Z" fill="#42c86f" stroke="#070d2a" stroke-width="7"/><path d="m149 275 13 13 25-30" fill="none" stroke="#fff" stroke-width="8"/><path d="M243 249h11v-10h28v10h11v11h9v28h-9v11h-11v9h-28v-9h-11v-11h-9v-28h9Z" fill="#42c86f" stroke="#070d2a" stroke-width="7"/><path d="m252 275 13 13 25-30" fill="none" stroke="#fff" stroke-width="8"/>
-        </svg>
-        <div><p class="brand-name">FOXFLOW</p><p class="brand-tag">CONTROL ROOM</p></div>
+    <section class="hero" aria-label="FoxFlow application overview">
+      <div class="copy">
+        <p class="kicker">Internal delivery system / Azure</p>
+        <h1>FoxFlow</h1>
+        <p class="subtitle">Sample application running on the internal CI/CD pipeline</p>
+        <p class="description">A secure, automated path from code commit to deployment — bringing source control, testing, security scanning and delivery into one clear flow.</p>
+        <div class="meta" aria-label="Project information">
+          <span><b>VERSION</b> 0.1.0</span>
+          <span><b>TEAM</b> Shahad, Nada, Adel, Abdullah</span>
+          <span><b>HEALTH</b> /health</span>
+        </div>
+        <a class="dashboard-link" href="/dashboard">Open control room →</a>
       </div>
 
-      <nav class="nav">
-        <button class="nav-button active" type="button" data-target="overview"><svg class="icon"><use href="#i-home"/></svg>Overview</button>
-        <button class="nav-button" type="button" data-target="pipeline"><svg class="icon"><use href="#i-pipeline"/></svg>Pipelines</button>
-        <button class="nav-button" type="button" data-target="security"><svg class="icon"><use href="#i-shield"/></svg>Security</button>
-        <button class="nav-button" type="button" data-target="pipeline"><svg class="icon"><use href="#i-box"/></svg>Deployments</button>
-        <button class="nav-button" type="button" data-target="activity"><svg class="icon"><use href="#i-bell"/></svg>Alerts</button>
-      </nav>
-      <p class="sidebar-foot">Internal delivery platform<br>Node 24 · Azure VM</p>
-    </aside>
-
-    <main class="main">
-      <header class="topbar"><span class="live-dot" aria-hidden="true"></span><span id="top-status">Connecting to GitLab</span><span class="topbar-divider"></span><time id="clock-date">Loading UTC time</time></header>
-
-      <section class="panel overview-panel" id="overview" aria-labelledby="health-title">
-        <div class="health-main">
-          <div class="health-check" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></div>
-          <div class="health-copy"><h1 class="health-title" id="health-title">CONNECTING</h1><p class="health-subtitle" id="health-subtitle">Loading live GitLab data</p></div>
+      <div class="visual" aria-label="FoxFlow project logo">
+        <div class="orbit">
+          <svg class="logo" viewBox="0 0 336 314" role="img" aria-label="FoxFlow pixel fox in a cloud logo" shape-rendering="crispEdges">
+            <path d="M116 1h104v25h9v31h-9v10h16v34H100V67h16V57h-9V26h9Z" fill="#27396d" stroke="#070d2a" stroke-width="8"/><path d="M112 28h112M104 63h128" stroke="#070d2a" stroke-width="8"/><rect x="126" y="11" width="10" height="9" fill="#54e49a"/><rect x="147" y="11" width="10" height="9" fill="#ffd739"/><rect x="183" y="11" width="10" height="9" fill="#101a38"/><rect x="204" y="11" width="10" height="9" fill="#101a38"/><rect x="126" y="39" width="10" height="9" fill="#54e49a"/><rect x="147" y="39" width="10" height="9" fill="#ffd739"/><rect x="204" y="39" width="10" height="9" fill="#101a38"/>
+            <path d="M82 82h172v9h27v14h18v15h16v22h12v44h-12v20h-17v15h-23v12H61v-12H38v-15H21v-20H9v-44h12v-22h16v-15h18V91h27Z" fill="#dff5ff" stroke="#070d2a" stroke-width="8"/><path d="M14 166h21v19h18v12h25v11h179v-11h25v-12h18v-19h22v20h-12v20h-17v15h-23v9H66v-9H43v-15H26v-20H14Z" fill="#8fd0ff"/><path d="M109 91h118v17h-17v10h-84v-10h-17Z" fill="#8ca8ca"/>
+            <path d="M93 111h15V79h17l35 38h16l35-38h17v32h15v65h-15v19h-18v15h-20v14h-44v-14h-20v-15h-18v-19H93Z" fill="#ff6317" stroke="#070d2a" stroke-width="8"/><path d="m102 162 66 58 66-58v24h-18v18h-21v15h-54v-15h-21v-18h-18Z" fill="#ffae24"/><path d="m118 111 50 29 50-29-8 72-42 34-42-34Z" fill="#ff7a17"/><rect x="115" y="148" width="16" height="19" fill="#070d2a"/><rect x="205" y="148" width="16" height="19" fill="#070d2a"/><rect x="157" y="177" width="10" height="10" fill="#070d2a"/><rect x="167" y="182" width="10" height="10" fill="#070d2a"/><rect x="177" y="177" width="10" height="10" fill="#070d2a"/>
+            <path d="M43 249h11v-10h28v10h11v11h9v28h-9v11H82v9H54v-9H43v-11h-9v-28h9Z" fill="#347ff2" stroke="#070d2a" stroke-width="7"/><path d="m61 267-9 8 9 8m19-16 9 8-9 8m-6-22-10 28" fill="none" stroke="#fff" stroke-width="6"/>
+            <path d="M140 249h11v-10h34v10h11v11h9v28h-9v11h-11v9h-34v-9h-11v-11h-9v-28h9Z" fill="#42c86f" stroke="#070d2a" stroke-width="7"/><path d="m149 275 13 13 25-30" fill="none" stroke="#fff" stroke-width="8"/>
+            <path d="M243 249h11v-10h28v10h11v11h9v28h-9v11h-11v9h-28v-9h-11v-11h-9v-28h9Z" fill="#42c86f" stroke="#070d2a" stroke-width="7"/><path d="m252 275 13 13 25-30" fill="none" stroke="#fff" stroke-width="8"/>
+          </svg>
         </div>
-        <div class="health-metrics" aria-label="System totals">
-          <span>Services</span><strong id="services-count">—</strong>
-          <span>Jobs</span><strong id="jobs-count">—</strong>
-          <span>Security</span><strong id="security-status">—</strong>
-          <span>Deployment</span><strong id="deployment-status">—</strong>
-        </div>
-      </section>
-
-      <section class="panel pipeline-panel" id="pipeline" aria-labelledby="pipeline-title">
-        <header class="section-head"><h2 class="section-title" id="pipeline-title">Pipeline —</h2><div class="pipeline-result"><span class="result-check"><svg class="icon"><use href="#i-check"/></svg></span><span id="pipeline-result">Loading</span><span class="result-separator">•</span><span class="duration" id="pipeline-duration">—</span></div></header>
-        <div class="stages">
-          <article class="stage" data-job="build" data-status="created"><div class="stage-icon"><svg class="icon"><use href="#i-gear"/></svg></div><h3 class="stage-label">Build</h3><span class="stage-state"><svg class="icon"><use href="#i-check"/></svg><span>Waiting</span></span></article>
-          <article class="stage" data-job="test" data-status="created"><div class="stage-icon"><svg class="icon"><use href="#i-flask"/></svg></div><h3 class="stage-label">Test</h3><span class="stage-state"><svg class="icon"><use href="#i-check"/></svg><span>Waiting</span></span></article>
-          <article class="stage" data-job="security_scan" data-status="created"><div class="stage-icon"><svg class="icon"><use href="#i-shield"/></svg></div><h3 class="stage-label">Security</h3><span class="stage-state"><svg class="icon"><use href="#i-check"/></svg><span>Waiting</span></span></article>
-          <article class="stage" data-job="deploy" data-status="created"><div class="stage-icon"><svg class="icon"><use href="#i-box"/></svg></div><h3 class="stage-label">Deploy</h3><span class="stage-state"><svg class="icon"><use href="#i-check"/></svg><span>Waiting</span></span></article>
-          <article class="stage" data-job="notify" data-status="created"><div class="stage-icon"><svg class="icon"><use href="#i-bell"/></svg></div><h3 class="stage-label">Notify</h3><span class="stage-state"><svg class="icon"><use href="#i-check"/></svg><span>Waiting</span></span></article>
-        </div>
-      </section>
-
-      <div class="detail-grid">
-        <section class="panel detail-panel" id="security" aria-labelledby="scan-title">
-          <header class="detail-head"><h2 class="detail-title" id="scan-title">Trivy Scan</h2><div class="detail-meta" id="scan-meta">Waiting for report</div></header>
-          <div class="scan-body"><div class="severity-grid"><div class="severity clear"><span>Critical</span><strong id="critical-count">—</strong></div><div class="severity clear"><span>High</span><strong id="high-count">—</strong></div><div class="severity"><span>Medium</span><strong id="medium-count">—</strong></div><div class="severity low"><span>Low</span><strong id="low-count">—</strong></div></div><div class="scan-summary"><span class="mini-check"><svg class="icon"><use href="#i-check"/></svg></span><div id="scan-summary">Loading security result<small id="scan-detail">GitLab artifact will appear automatically</small></div></div></div>
-        </section>
-
-        <section class="panel detail-panel" aria-labelledby="ai-title">
-          <header class="detail-head"><h2 class="detail-title" id="ai-title"><svg class="icon"><use href="#i-brain"/></svg>AI Analysis</h2></header>
-          <div class="analysis-body"><div class="analysis-row"><span class="analysis-label">Cause</span><span class="analysis-value" id="analysis-cause">Loading analysis…</span></div><div class="analysis-row"><span class="analysis-label">Evidence</span><span class="analysis-value" id="analysis-evidence">Waiting for GitLab.</span></div><div class="analysis-row"><span class="analysis-label">Suggested fix</span><span class="analysis-value" id="analysis-fix">—</span></div></div>
-        </section>
-
-        <section class="panel detail-panel activity-panel" id="activity" aria-labelledby="activity-title">
-          <header class="detail-head"><h2 class="detail-title" id="activity-title">Activity</h2><span class="detail-meta">Live log →</span></header>
-          <div class="activity-body"><ol class="activity-list" id="activity-list"><li class="activity-item"><span class="activity-check"><svg class="icon"><use href="#i-check"/></svg></span><time class="activity-time">—</time><span class="activity-message">Loading live activity…</span></li></ol></div>
-        </section>
       </div>
-    </main>
-  </div>
+    </section>
 
-  <script>
-    const clock = document.querySelector('#clock-date');
-    const healthTitle = document.querySelector('#health-title');
-    const healthSubtitle = document.querySelector('#health-subtitle');
-    const topStatus = document.querySelector('#top-status');
-    const servicesCount = document.querySelector('#services-count');
-    const jobsCount = document.querySelector('#jobs-count');
-    const securityStatus = document.querySelector('#security-status');
-    const deploymentStatus = document.querySelector('#deployment-status');
-    const pipelineTitle = document.querySelector('#pipeline-title');
-    const pipelineResult = document.querySelector('#pipeline-result');
-    const pipelineDuration = document.querySelector('#pipeline-duration');
-    let appIsHealthy = true;
-
-    const statusLabels = {
-      success: 'Passed', failed: 'Failed', running: 'Running', pending: 'Pending',
-      created: 'Waiting', preparing: 'Preparing', manual: 'Manual', skipped: 'Skipped',
-      canceled: 'Canceled', waiting_for_resource: 'Waiting', scheduled: 'Scheduled',
-    };
-
-    function updateClock() {
-      const now = new Date();
-      clock.textContent = now.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'UTC' }).replace(',', '') + ' UTC';
-    }
-
-    function setHealth(ok) {
-      appIsHealthy = ok;
-      document.body.dataset.health = ok ? 'ok' : 'down';
-      if (!ok) {
-        healthTitle.textContent = 'SERVICE DEGRADED';
-        healthSubtitle.textContent = 'Application health endpoint is not responding';
-        topStatus.textContent = 'Service disruption detected';
-      }
-    }
-
-    async function checkHealth() {
-      try {
-        const response = await fetch('/health', { cache: 'no-store' });
-        const data = await response.json();
-        setHealth(response.ok && data.status === 'ok');
-      } catch (_) { setHealth(false); }
-    }
-
-    function formatDuration(seconds) {
-      if (!Number.isFinite(seconds)) return '—';
-      const minutes = Math.floor(seconds / 60);
-      const remainder = Math.round(seconds % 60);
-      return minutes ? `${minutes}m ${String(remainder).padStart(2, '0')}s` : `${remainder}s`;
-    }
-
-    function formatTime(value) {
-      if (!value) return '—';
-      return new Date(value).toLocaleTimeString('en-GB', {
-        hour: '2-digit', minute: '2-digit', hour12: false,
-      });
-    }
-
-    function findJob(jobs, name) {
-      return name === 'notify'
-        ? jobs.find((job) => job.name.startsWith('notify_'))
-        : jobs.find((job) => job.name === name);
-    }
-
-    function renderStages(jobs) {
-      document.querySelectorAll('.stage[data-job]').forEach((stage) => {
-        const job = findJob(jobs, stage.dataset.job);
-        const status = job?.status ?? 'created';
-        stage.dataset.status = status;
-        stage.querySelector('.stage-state span').textContent = statusLabels[status] ?? status;
-        stage.title = job ? `${job.name} · ${formatDuration(job.duration)}` : 'Job not created yet';
-      });
-    }
-
-    function renderSecurity(security) {
-      const values = security?.counts ?? {};
-      for (const severity of ['critical', 'high', 'medium', 'low']) {
-        document.querySelector(`#${severity}-count`).textContent = Number.isFinite(values[severity]) ? values[severity] : '—';
-      }
-      const status = security?.status ?? 'created';
-      securityStatus.textContent = status === 'success' ? 'OK' : (statusLabels[status] ?? status).toUpperCase();
-      document.querySelector('#scan-meta').textContent = security?.scannedAt
-        ? `Updated ${formatTime(security.scannedAt)}`
-        : 'Waiting for security job';
-      document.querySelector('#scan-summary').childNodes[0].textContent = status === 'success'
-        ? 'Security scan passed'
-        : `Security scan ${statusLabels[status]?.toLowerCase() ?? status}`;
-      document.querySelector('#scan-detail').textContent = security?.reportAvailable
-        ? 'Counts loaded from the Trivy JSON artifact'
-        : (status === 'success' ? 'No unfixed HIGH or CRITICAL vulnerabilities' : 'Live GitLab job status');
-    }
-
-    function renderActivity(items) {
-      const list = document.querySelector('#activity-list');
-      list.replaceChildren(...items.map((item) => {
-        const row = document.createElement('li');
-        row.className = 'activity-item';
-        row.dataset.status = item.status;
-        const mark = document.createElement('span');
-        mark.className = 'activity-check';
-        mark.innerHTML = '<svg class="icon"><use href="#i-check"/></svg>';
-        const time = document.createElement('time');
-        time.className = 'activity-time';
-        time.textContent = formatTime(item.time);
-        const message = document.createElement('span');
-        message.className = 'activity-message';
-        message.textContent = item.message;
-        row.append(mark, time, message);
-        return row;
-      }));
-    }
-
-    function renderDashboard(data) {
-      const pipeline = data.pipeline;
-      const status = pipeline.status;
-      const running = ['running', 'pending', 'created', 'preparing', 'waiting_for_resource'].includes(status);
-      document.body.dataset.pipeline = status === 'failed' ? 'failed' : (running ? 'running' : status);
-      pipelineTitle.textContent = `Pipeline #${pipeline.iid}`;
-      pipelineResult.textContent = statusLabels[status] ?? status;
-      pipelineDuration.textContent = formatDuration(pipeline.duration);
-      servicesCount.textContent = `${data.system.services.healthy} / ${data.system.services.total}`;
-      jobsCount.textContent = `${pipeline.completedJobs} / ${pipeline.totalJobs}`;
-      deploymentStatus.textContent = (statusLabels[data.deployment.status] ?? data.deployment.status).toUpperCase();
-      renderStages(pipeline.jobs);
-      renderSecurity(data.security);
-      document.querySelector('#analysis-cause').textContent = data.analysis.cause;
-      document.querySelector('#analysis-evidence').textContent = data.analysis.evidence;
-      document.querySelector('#analysis-fix').textContent = data.analysis.suggestedFix;
-      renderActivity(data.activity);
-
-      if (!appIsHealthy) return;
-      if (status === 'success') {
-        healthTitle.textContent = 'SYSTEMS HEALTHY';
-        healthSubtitle.textContent = `Pipeline #${pipeline.iid} completed successfully`;
-        topStatus.textContent = `Live GitLab · ${data.system.runners.online} runner online`;
-      } else if (running) {
-        healthTitle.textContent = 'PIPELINE RUNNING';
-        healthSubtitle.textContent = `Watching ${pipeline.completedJobs} of ${pipeline.totalJobs} jobs`;
-        topStatus.textContent = `Live GitLab · Pipeline #${pipeline.iid} in progress`;
-      } else {
-        healthTitle.textContent = 'PIPELINE ATTENTION';
-        healthSubtitle.textContent = `Pipeline #${pipeline.iid} is ${status}`;
-        topStatus.textContent = `Live GitLab · Action may be required`;
-      }
-    }
-
-    function showDashboardUnavailable() {
-      topStatus.textContent = 'GitLab data temporarily unavailable';
-      healthSubtitle.textContent = 'Application is online · reconnecting to GitLab';
-    }
-
-    async function refreshDashboard() {
-      try {
-        const response = await fetch('/api/dashboard', { cache: 'no-store' });
-        if (!response.ok) throw new Error('dashboard unavailable');
-        renderDashboard(await response.json());
-      } catch (_) { showDashboardUnavailable(); }
-    }
-
-    document.querySelectorAll('.nav-button').forEach((button) => {
-      button.addEventListener('click', () => {
-        document.querySelectorAll('.nav-button').forEach((item) => item.classList.remove('active'));
-        button.classList.add('active');
-        document.getElementById(button.dataset.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-    });
-
-    updateClock();
-    checkHealth();
-    refreshDashboard();
-    setInterval(updateClock, 1000);
-    setInterval(checkHealth, 10000);
-    setInterval(refreshDashboard, 15000);
-  </script>
+    <footer class="loading">
+      <span>Loading automated delivery environment...</span>
+      <span class="bar" aria-label="80 percent loaded"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+    </footer>
+  </main>
 </body>
 </html>

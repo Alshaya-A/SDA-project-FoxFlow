@@ -48,6 +48,15 @@ test('GET / returns 200 and HTML', async () => {
   const res = await request('GET', '/');
   assert.strictEqual(res.status, 200);
   assert.match(res.headers['content-type'], /text\/html/);
+  assert.match(res.body, /FoxFlow \| Internal CI\/CD Platform/);
+  assert.match(res.body, /href="\/dashboard"/);
+});
+
+test('GET /dashboard returns the live control room', async () => {
+  const res = await request('GET', '/dashboard');
+  assert.strictEqual(res.status, 200);
+  assert.match(res.headers['content-type'], /text\/html/);
+  assert.match(res.body, /FoxFlow Control Room/);
 });
 
 test('GET /api/dashboard fails safely when GitLab integration is unavailable', async () => {
