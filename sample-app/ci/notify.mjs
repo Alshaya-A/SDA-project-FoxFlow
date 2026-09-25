@@ -121,8 +121,40 @@ async function analyzeWithOpenRouter(failureContext) {
 
   const data = await response.json();
   const content = data?.choices?.[0]?.message?.content;
-  if (typeof content === "string" && content.trim()) return content.trim();
-  throw new Error("OpenRouter returned an empty analysis");
+  if (typeof content === "string" && isStructuredAnalysis(content)) return content.trim();
+  throw new Error("OpenRouter returned an unstructured analysis");
+}
+
+export function isStructuredAnalysis(value) {
+  if (typeof value !== "string") return false;
+  return ["Cause", "Evidence", "Suggested fix"].every((heading) =>
+    new RegExp(`(?:^|\\n)\\s*(?:\\*\\*)?${heading}(?:\\*\\*)?\\s*:`, "i").test(value),
+  );
+}
+
+export function fallbackAnalysis(failureContext) {
+  const clean = stripControlCharacters(failureContext);
+  const job = clean.match(/^Failed job:\s*(.+)$/m)?.[1]?.trim() || "pipeline";
+  const comparison = clean.match(/\b([^\s]+)\s+!==\s+([^\s]+)\b/);
+  const location = clean.match(/\/([^/\s()]+:\d+):\d+\)?/);
+
+  if (comparison) {
+    const actual = comparison[1];
+    const expected = comparison[2];
+    const where = location ? ` at ${location[1]}` : "";
+    return `Cause: The ${job} job failed because an assertion expected ${expected} but received ${actual}.
+Evidence: GitLab reported \"${actual} !== ${expected}\"${where}.
+Suggested fix: Confirm the intended value, then update the application or the assertion${where} and run the pipeline again.`;
+  }
+
+  const errorLine = clean
+    .split("\n")
+    .map((line) => line.trim())
+    .find((line) => /(?:AssertionError|Error:|ERROR:|failed:|failure)/i.test(line) && line.length > 8);
+
+  return `Cause: The ${job} job failed during the GitLab pipeline.
+Evidence: ${errorLine ? clip(errorLine, 360) : "GitLab marked the job as failed; review its trace for the first error."}
+Suggested fix: Correct the first reported error in the ${job} job, then push the change and rerun the pipeline.`;
 }
 
 function baseDetails() {
@@ -147,15 +179,17 @@ ${baseDetails()}`;
   }
 
   let analysis;
+  let analysisSource = "OpenRouter AI";
   try {
     analysis = clip(await analyzeWithOpenRouter(context), 2500);
-  } catch (error) {
-    analysis = `AI analysis is temporarily unavailable: ${error.message}`;
+  } catch (_) {
+    analysis = clip(fallbackAnalysis(context), 2500);
+    analysisSource = "GitLab log fallback";
   }
 
   return `🚨 FoxFlow Pipeline Failed
 
-🤖 AI analysis
+🤖 Failure analysis · ${analysisSource}
 ${analysis}
 
 ${baseDetails()}`;

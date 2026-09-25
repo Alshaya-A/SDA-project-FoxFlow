@@ -126,3 +126,21 @@ test('POST / is rejected with 405', async () => {
   const res = await request('POST', '/');
   assert.strictEqual(res.status, 405);
 });
+
+test('notification rejects safety-only model output and explains assertion failures locally', async () => {
+  const { fallbackAnalysis, isStructuredAnalysis } = await import('./ci/notify.mjs');
+  assert.strictEqual(isStructuredAnalysis('User Safety: safe\nResponse Safety: safe'), false);
+  assert.strictEqual(
+    isStructuredAnalysis('Cause: Test failed\nEvidence: 200 !== 201\nSuggested fix: Correct the assertion'),
+    true,
+  );
+
+  const analysis = fallbackAnalysis(`Failed job: test
+Stage: test
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+200 !== 201
+at TestContext.<anonymous> (/builds/foxflow/sample-app/test.js:32:10)`);
+  assert.match(analysis, /expected 201 but received 200/);
+  assert.match(analysis, /test\.js:32/);
+  assert.match(analysis, /Suggested fix:/);
+});
