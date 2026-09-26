@@ -25,6 +25,9 @@ docker compose -p foxflow-app -f deploy/docker-compose.yml config --quiet
 docker compose -p foxflow-app -f deploy/docker-compose.yml pull
 docker compose -p foxflow-app -f deploy/docker-compose.yml up -d --wait --wait-timeout 120
 
+# Keep the public site behind an automatically renewed TLS certificate.
+sh ci/install-https.sh
+
 # Install or refresh proactive host monitoring after a successful deployment.
 # Telegram secrets are copied over SSH to a root-owned environment file and are
 # never stored in the repository or printed to the job log.

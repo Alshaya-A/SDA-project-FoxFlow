@@ -7,10 +7,10 @@ application deployed automatically after build, test, and security gates pass.
 ## Current status
 
 - GitLab: `http://20.127.65.116:8080`
-- Application: `http://20.127.65.116:3000`
-- Operations dashboard: `http://20.127.65.116:3000/dashboard`
-- Health endpoint: `http://20.127.65.116:3000/health`
-- Live dashboard API: `http://20.127.65.116:3000/api/dashboard`
+- Application: `https://foxflow.20-127-65-116.sslip.io`
+- Operations dashboard: `https://foxflow.20-127-65-116.sslip.io/dashboard`
+- Health endpoint: `https://foxflow.20-127-65-116.sslip.io/health`
+- Live dashboard API: `https://foxflow.20-127-65-116.sslip.io/api/dashboard`
 
 The application home page and the live operations dashboard are separate pages
 inside the same service. The dashboard reads the latest GitLab pipeline, jobs,
@@ -84,7 +84,7 @@ OpenSSH public key, then run the normal Terraform workflow.
 From any device that can reach the VM:
 
 ```bash
-curl -i http://20.127.65.116:3000/health
+curl -i https://foxflow.20-127-65-116.sslip.io/health
 ```
 
 Expected result: `HTTP/1.1 200 OK` and the JSON response shown above.
