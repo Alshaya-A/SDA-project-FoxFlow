@@ -48,7 +48,7 @@ The verified health response is:
 
 ## Architecture
 
-![FoxFlow DevSecOps architecture](docs/foxflow-architecture.svg)
+![FoxFlow advanced DevSecOps architecture](docs/foxflow-architecture-advanced.svg)
 
 ```text
 Developer -> GitLab (primary workspace)

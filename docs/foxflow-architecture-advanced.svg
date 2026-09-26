@@ -1,0 +1,194 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1440" viewBox="0 0 2560 1440" role="img" aria-labelledby="title desc">
+  <title id="title">FoxFlow enterprise DevSecOps architecture</title>
+  <desc id="desc">A GitLab-first DevSecOps architecture showing source control, CI/CD gates, container registry, Azure infrastructure, HTTPS delivery, AI failure analysis, Telegram notifications, monitoring, and backup.</desc>
+  <defs>
+    <linearGradient id="header" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#071a33"/><stop offset="1" stop-color="#12345b"/>
+    </linearGradient>
+    <linearGradient id="pipeline" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fbff"/><stop offset="1" stop-color="#eef5ff"/>
+    </linearGradient>
+    <linearGradient id="azure" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0f9ff"/><stop offset="1" stop-color="#e6f2ff"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="#071a33" flood-opacity=".13"/>
+    </filter>
+    <marker id="arrowCode" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth"><path d="M1 1l10 5-10 5z" fill="#173654"/></marker>
+    <marker id="arrowArtifact" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth"><path d="M1 1l10 5-10 5z" fill="#2878bd"/></marker>
+    <marker id="arrowOps" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth"><path d="M1 1l10 5-10 5z" fill="#7a55c7"/></marker>
+    <marker id="arrowBackup" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth"><path d="M1 1l10 5-10 5z" fill="#60758d"/></marker>
+    <style>
+      .h1{font:800 42px Inter,Arial,sans-serif;fill:#fff;letter-spacing:.6px}
+      .h2{font:800 25px Inter,Arial,sans-serif;fill:#10233f;letter-spacing:.4px}
+      .h3{font:800 20px Inter,Arial,sans-serif;fill:#10233f}
+      .body{font:500 16px Inter,Arial,sans-serif;fill:#4b6079}
+      .small{font:600 14px Inter,Arial,sans-serif;fill:#60758d}
+      .micro{font:700 12px Inter,Arial,sans-serif;fill:#6c7f94;letter-spacing:.7px}
+      .white{fill:#fff}
+      .card{fill:#fff;stroke:#a9b8c9;stroke-width:2.2;rx:16;filter:url(#shadow)}
+      .code{fill:none;stroke:#173654;stroke-width:3;marker-end:url(#arrowCode)}
+      .artifact{fill:none;stroke:#2878bd;stroke-width:3;marker-end:url(#arrowArtifact)}
+      .ops{fill:none;stroke:#7a55c7;stroke-width:2.6;stroke-dasharray:9 7;marker-end:url(#arrowOps)}
+      .backup{fill:none;stroke:#60758d;stroke-width:2.5;stroke-dasharray:8 7;marker-end:url(#arrowBackup)}
+      .icon{fill:none;stroke:#173654;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+    </style>
+  </defs>
+
+  <rect width="2560" height="1440" fill="#f5f8fc"/>
+
+  <!-- Header -->
+  <rect width="2560" height="150" fill="url(#header)"/>
+  <g transform="translate(55 24)">
+    <rect x="15" width="84" height="22" rx="5" fill="#2c5078"/>
+    <circle cx="29" cy="11" r="4" fill="#66f0b5"/><circle cx="45" cy="11" r="4" fill="#ffd166"/>
+    <path d="M7 39L31 25l26 12 26-12 24 14-9 50-41 26L16 89z" fill="#ff6b35" stroke="#dbeaff" stroke-width="4"/>
+    <path d="M27 55l19 9 11-13 11 13 19-9-9 31-21 14-21-14z" fill="#fff2df"/>
+    <circle cx="41" cy="69" r="4" fill="#173654"/><circle cx="73" cy="69" r="4" fill="#173654"/><path d="M52 80h10l-5 7z" fill="#173654"/>
+    <text x="135" y="52" class="h1">FOXFLOW DEVSECOPS PLATFORM</text>
+    <text x="137" y="86" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="500" fill="#bcd7f5">GitLab-first delivery · Secure Azure runtime · AI-assisted operations</text>
+  </g>
+  <g transform="translate(1830 46)">
+    <rect width="180" height="44" rx="22" fill="#123f56" stroke="#66f0b5" stroke-width="1.5"/><circle cx="24" cy="22" r="7" fill="#66f0b5"/><text x="98" y="28" text-anchor="middle" font-family="Inter,Arial" font-size="14" font-weight="700" fill="#dffff1">GITLAB FIRST</text>
+    <rect x="195" width="165" height="44" rx="22" fill="#183a63" stroke="#78b7ff" stroke-width="1.5"/><text x="278" y="28" text-anchor="middle" font-family="Inter,Arial" font-size="14" font-weight="700" fill="#d6eaff">AUTOMATED</text>
+    <rect x="375" width="160" height="44" rx="22" fill="#183a63" stroke="#78b7ff" stroke-width="1.5"/><text x="455" y="28" text-anchor="middle" font-family="Inter,Arial" font-size="14" font-weight="700" fill="#d6eaff">HTTPS</text>
+  </g>
+
+  <!-- Source and governance lane -->
+  <text x="80" y="194" class="micro">01 · SOURCE &amp; GOVERNANCE</text>
+  <g transform="translate(80 224)">
+    <rect class="card" width="210" height="145"/>
+    <circle cx="67" cy="48" r="27" fill="#173654"/><circle cx="67" cy="43" r="15" fill="#fff"/>
+    <path d="M30 119c4-34 19-51 37-51s33 17 37 51" fill="#173654"/>
+    <rect x="41" y="82" width="52" height="38" rx="4" fill="#60758d"/><circle cx="67" cy="101" r="5" fill="#fff"/>
+    <text x="147" y="55" text-anchor="middle" class="h3">Developer</text>
+    <text x="147" y="82" text-anchor="middle" class="body">Branch · Commit</text>
+    <text x="147" y="108" text-anchor="middle" class="body">Merge Request</text>
+  </g>
+
+  <g transform="translate(390 205)">
+    <rect width="405" height="182" rx="18" fill="#fff" stroke="#f0522d" stroke-width="3" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="405" height="38" rx="18" fill="#fff0eb"/><rect x="0" y="22" width="405" height="16" fill="#fff0eb"/>
+    <text x="202" y="25" text-anchor="middle" font-family="Inter,Arial" font-size="13" font-weight="800" fill="#b73920">PRIMARY DEVOPS PLATFORM</text>
+    <path d="M35 104l25-64 24 64 24-64 25 64-49 36z" fill="#f0522d"/><path d="M60 40l24 64H35z" fill="#e24329"/><path d="M108 40l-24 64h49z" fill="#fc6d26"/>
+    <text x="160" y="99" font-family="Inter,Arial" font-size="39" font-weight="800" fill="#171321">GitLab CE</text>
+    <text x="160" y="130" class="body">Repository · Reviews · API · CI/CD</text>
+    <rect x="160" y="143" width="210" height="25" rx="12" fill="#e8fff5"/><circle cx="178" cy="155" r="6" fill="#20b875"/><text x="272" y="160" text-anchor="middle" class="small">Protected main branch</text>
+  </g>
+
+  <g transform="translate(930 224)">
+    <rect class="card" width="250" height="145"/>
+    <rect x="0" y="0" width="250" height="34" rx="16" fill="#eef1f5"/><rect x="0" y="18" width="250" height="16" fill="#eef1f5"/>
+    <text x="125" y="23" text-anchor="middle" class="micro">BACKUP REPOSITORY</text>
+    <circle cx="61" cy="84" r="30" fill="#20252d"/><path d="M47 84c0-11 8-20 14-20s14 9 14 20c0 9-4 16-11 19v15h-7v-15c-6-3-10-10-10-19z" fill="#fff"/>
+    <text x="166" y="82" text-anchor="middle" class="h3">GitHub</text><text x="166" y="108" text-anchor="middle" class="body">Code archive</text>
+  </g>
+
+  <path class="code" d="M290 297H378"/><text x="334" y="283" text-anchor="middle" class="small">Push</text>
+  <path d="M378 297l-15-9v18z" fill="#173654"/>
+  <path class="backup" d="M795 297H918"/><text x="856" y="283" text-anchor="middle" class="small">Mirror / archive</text>
+  <path d="M918 297l-15-9v18z" fill="#60758d"/>
+  <path class="code" d="M592 387V423"/><text x="615" y="414" class="small">Trigger</text>
+  <path d="M592 423l-9-15h18z" fill="#173654"/>
+
+  <!-- CI/CD control plane -->
+  <rect x="70" y="430" width="1510" height="500" rx="25" fill="url(#pipeline)" stroke="#54708f" stroke-width="2.7" stroke-dasharray="13 10"/>
+  <rect x="70" y="430" width="1510" height="72" rx="25" fill="#e8f1fb"/><rect x="70" y="476" width="1510" height="26" fill="#e8f1fb"/>
+  <text x="105" y="466" class="h2">02 · CONTINUOUS INTEGRATION &amp; DELIVERY</text>
+  <text x="105" y="490" class="body">GitLab Runner enforces every quality and security gate before production</text>
+  <g transform="translate(1300 449)"><rect width="240" height="36" rx="18" fill="#fff" stroke="#4b78b8" stroke-width="1.5"/><circle cx="21" cy="18" r="10" fill="#4b78b8"/><path d="M16 18h10M21 13v10" stroke="#fff" stroke-width="2.5"/><text x="132" y="23" text-anchor="middle" class="small">Self-hosted GitLab Runner</text></g>
+
+  <!-- Pipeline stages -->
+  <g transform="translate(105 545)">
+    <rect class="card" width="240" height="190"/>
+    <circle cx="29" cy="29" r="18" fill="#173654"/><text x="29" y="35" text-anchor="middle" font-family="Arial" font-size="16" font-weight="800" fill="#fff">1</text>
+    <circle cx="120" cy="69" r="34" fill="#dff4ff"/><path class="icon" d="M99 78h42l-5-31h-32zM108 47V36h24v11"/>
+    <text x="120" y="126" text-anchor="middle" class="h3">BUILD</text><text x="120" y="153" text-anchor="middle" class="body">Docker image</text><text x="120" y="176" text-anchor="middle" class="small">Immutable SHA tag</text>
+  </g>
+  <g transform="translate(400 545)">
+    <rect class="card" width="240" height="190"/>
+    <circle cx="29" cy="29" r="18" fill="#173654"/><text x="29" y="35" text-anchor="middle" font-family="Arial" font-size="16" font-weight="800" fill="#fff">2</text>
+    <circle cx="120" cy="69" r="34" fill="#e8faef"/><path class="icon" d="M109 42v22L92 89h56l-17-25V42M103 42h34M102 81h36"/>
+    <text x="120" y="126" text-anchor="middle" class="h3">TEST</text><text x="120" y="153" text-anchor="middle" class="body">Node.js tests</text><text x="120" y="176" text-anchor="middle" class="small">Quality gate</text>
+  </g>
+  <g transform="translate(695 545)">
+    <rect class="card" width="240" height="190"/>
+    <circle cx="29" cy="29" r="18" fill="#173654"/><text x="29" y="35" text-anchor="middle" font-family="Arial" font-size="16" font-weight="800" fill="#fff">3</text>
+    <circle cx="120" cy="69" r="34" fill="#fff2df"/><path d="M120 36l28 11v21c0 18-11 31-28 39-17-8-28-21-28-39V47z" fill="none" stroke="#b66a13" stroke-width="6"/><path d="M106 69l10 10 19-23" fill="none" stroke="#b66a13" stroke-width="6" stroke-linecap="round"/>
+    <text x="120" y="126" text-anchor="middle" class="h3">SECURITY</text><text x="120" y="153" text-anchor="middle" class="body">Trivy scan</text><text x="120" y="176" text-anchor="middle" class="small">Block critical / high</text>
+  </g>
+  <g transform="translate(990 545)">
+    <rect class="card" width="240" height="190"/>
+    <circle cx="29" cy="29" r="18" fill="#173654"/><text x="29" y="35" text-anchor="middle" font-family="Arial" font-size="16" font-weight="800" fill="#fff">4</text>
+    <circle cx="120" cy="69" r="34" fill="#eeeaff"/><path class="icon" d="M120 37l29 16v34l-29 16-29-16V53zM91 53l29 16 29-16M120 69v34"/>
+    <text x="120" y="126" text-anchor="middle" class="h3">DEPLOY</text><text x="120" y="153" text-anchor="middle" class="body">Docker Compose</text><text x="120" y="176" text-anchor="middle" class="small">SSH to Azure VM</text>
+  </g>
+  <g transform="translate(1285 545)">
+    <rect class="card" width="240" height="190"/>
+    <circle cx="29" cy="29" r="18" fill="#173654"/><text x="29" y="35" text-anchor="middle" font-family="Arial" font-size="16" font-weight="800" fill="#fff">5</text>
+    <circle cx="120" cy="69" r="34" fill="#e5fff6"/><path class="icon" d="M101 86h38l-6-10V61c0-11-5-19-13-19s-13 8-13 19v15zM115 94h10"/>
+    <text x="120" y="126" text-anchor="middle" class="h3">NOTIFY</text><text x="120" y="153" text-anchor="middle" class="body">Result summary</text><text x="120" y="176" text-anchor="middle" class="small">Telegram delivery</text>
+  </g>
+  <path class="code" d="M345 640H388"/><path class="code" d="M640 640H683"/><path class="code" d="M935 640H978"/><path class="code" d="M1230 640H1273"/>
+  <path d="M388 640l-15-9v18zM683 640l-15-9v18zM978 640l-15-9v18zM1273 640l-15-9v18z" fill="#173654"/>
+
+  <!-- Artifacts inside CI -->
+  <g transform="translate(305 790)"><rect width="420" height="105" rx="16" fill="#e8f3ff" stroke="#2878bd" stroke-width="2"/><path d="M30 31h55v46H30zM41 20h33v11M44 45h28M44 60h28" fill="none" stroke="#2878bd" stroke-width="4"/><text x="250" y="46" text-anchor="middle" class="h3">GitLab Container Registry</text><text x="250" y="74" text-anchor="middle" class="body">Private network · immutable image</text></g>
+  <g transform="translate(805 790)"><rect width="420" height="105" rx="16" fill="#fff" stroke="#a9b8c9" stroke-width="2"/><circle cx="55" cy="52" r="27" fill="#eff3f7"/><path d="M42 50h26M42 61h18M42 39h26" stroke="#60758d" stroke-width="4" stroke-linecap="round"/><text x="260" y="46" text-anchor="middle" class="h3">Pipeline Evidence</text><text x="260" y="74" text-anchor="middle" class="body">Logs · Reports · Security results</text></g>
+  <path class="artifact" d="M225 735C225 830 270 842 293 842"/>
+  <path class="artifact" d="M1110 735C1110 770 880 760 742 842"/>
+  <path class="backup" d="M815 735V778"/>
+
+  <!-- Azure trust boundary -->
+  <rect x="1640" y="205" width="700" height="725" rx="26" fill="url(#azure)" stroke="#2878bd" stroke-width="3"/>
+  <rect x="1665" y="232" width="650" height="70" rx="16" fill="#dceeff" stroke="#78b7ff" stroke-width="1.5"/>
+  <text x="1700" y="264" class="h2" fill="#1372b9">03 · AZURE PRODUCTION</text>
+  <text x="1700" y="288" class="body">Virtual Network · Ubuntu VM · Docker Engine</text>
+  <g transform="translate(2180 244)"><path d="M22 0l22 9v17c0 15-9 25-22 32C9 51 0 41 0 26V9z" fill="#2878bd"/><path d="M11 27l8 8 15-19" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><text x="-8" y="76" class="micro">TRUST BOUNDARY</text></g>
+
+  <g transform="translate(1690 335)"><rect width="600" height="92" rx="15" fill="#fff" stroke="#e7a23d" stroke-width="2"/><circle cx="54" cy="46" r="28" fill="#fff2df"/><path d="M54 22l24 10v18c0 15-10 25-24 32-14-7-24-17-24-32V32z" fill="none" stroke="#c57a16" stroke-width="4"/><text x="185" y="40" class="h3">Network Security Group</text><text x="185" y="66" class="body">Public: 80 / 443 · Admin: 2222 · Internal services blocked</text></g>
+  <g transform="translate(1690 455)"><rect width="285" height="122" rx="15" fill="#fff" stroke="#2d6b54" stroke-width="2"/><circle cx="55" cy="56" r="31" fill="#2d6b54"/><text x="55" y="67" text-anchor="middle" font-family="Arial" font-size="30" font-weight="800" fill="#fff">C</text><text x="183" y="48" text-anchor="middle" class="h3">Caddy Edge</text><text x="183" y="76" text-anchor="middle" class="body">TLS termination</text><text x="183" y="100" text-anchor="middle" class="small">HTTPS reverse proxy</text></g>
+  <g transform="translate(2005 455)"><rect width="285" height="122" rx="15" fill="#fff" stroke="#20a56a" stroke-width="2.5"/><circle cx="55" cy="56" r="31" fill="#66f0b5"/><path d="M40 57l10 10 21-26" fill="none" stroke="#164836" stroke-width="7" stroke-linecap="round"/><text x="183" y="48" text-anchor="middle" class="h3">FoxFlow App</text><text x="183" y="76" text-anchor="middle" class="body">Port 3000 private</text><text x="183" y="100" text-anchor="middle" class="small">/ · /login · /dashboard · /health</text></g>
+  <path class="artifact" d="M1975 516H1993"/>
+  <g transform="translate(1690 610)"><rect width="600" height="125" rx="15" fill="#fff" stroke="#71859c" stroke-width="2"/><text x="300" y="36" text-anchor="middle" class="h3">Internal Platform Services</text><line x1="200" y1="53" x2="200" y2="105" stroke="#d5dde7"/><line x1="400" y1="53" x2="400" y2="105" stroke="#d5dde7"/><text x="100" y="76" text-anchor="middle" class="body">GitLab CE</text><text x="100" y="99" text-anchor="middle" class="small">Web · API · SSH</text><text x="300" y="76" text-anchor="middle" class="body">Runner</text><text x="300" y="99" text-anchor="middle" class="small">Docker executor</text><text x="500" y="76" text-anchor="middle" class="body">Registry</text><text x="500" y="99" text-anchor="middle" class="small">Port 5050 private</text></g>
+  <g transform="translate(1690 770)"><rect width="600" height="110" rx="15" fill="#eef1f5" stroke="#9aa8b8" stroke-width="2"/><path d="M36 42h62v38H36zM45 31h44v11" fill="none" stroke="#60758d" stroke-width="4"/><text x="345" y="46" text-anchor="middle" class="h3">Persistent Azure Data Disk</text><text x="345" y="74" text-anchor="middle" class="body">Repositories · Registry · Logs · Artifacts · Backups</text></g>
+
+  <path class="artifact" d="M1110 545C1320 470 1510 490 1678 516"/>
+  <path d="M1678 516l-15-9v18z" fill="#2878bd"/>
+  <path class="backup" d="M592 205C1080 145 1400 155 1628 245"/><text x="1170" y="174" text-anchor="middle" class="small">GitLab platform hosted on the Azure VM</text>
+  <path d="M1628 245l-10-13-6 17z" fill="#60758d"/>
+
+  <!-- User access -->
+  <g transform="translate(2390 470)"><circle cx="55" cy="55" r="54" fill="#fff" stroke="#173654" stroke-width="3"/><circle cx="55" cy="38" r="17" fill="#173654"/><path d="M24 90c4-26 16-39 31-39s27 13 31 39" fill="#173654"/><text x="55" y="137" text-anchor="middle" class="h3">End Users</text><text x="55" y="162" text-anchor="middle" class="small">HTTPS access</text></g>
+  <path class="code" d="M2290 516H2378"/>
+  <path d="M2378 516l-15-9v18z" fill="#173654"/>
+
+  <!-- Operations plane -->
+  <rect x="70" y="975" width="2270" height="335" rx="25" fill="#fff" stroke="#b5a8d9" stroke-width="2.5"/>
+  <rect x="70" y="975" width="2270" height="68" rx="25" fill="#f1edfb"/><rect x="70" y="1018" width="2270" height="25" fill="#f1edfb"/>
+  <text x="105" y="1017" class="h2">04 · OBSERVABILITY, INTELLIGENCE &amp; RECOVERY</text>
+
+  <g transform="translate(105 1085)"><rect class="card" width="345" height="170"/><circle cx="62" cy="64" r="34" fill="#e8f3ff"/><path d="M38 78h18l10-35 14 51 13-30h25" fill="none" stroke="#16a36b" stroke-width="5" stroke-linecap="round"/><text x="220" y="53" text-anchor="middle" class="h3">FoxFlow Dashboard</text><text x="220" y="81" text-anchor="middle" class="body">Live pipeline status</text><text x="220" y="106" text-anchor="middle" class="body">Trivy · Deployments · Activity</text><rect x="70" y="132" width="205" height="24" rx="12" fill="#e8fff5"/><text x="172" y="149" text-anchor="middle" class="small">Authentication protected</text></g>
+  <g transform="translate(495 1085)"><rect class="card" width="345" height="170"/><circle cx="62" cy="64" r="34" fill="#e8faef"/><path d="M37 75h20l10-38 14 56 13-32h26" fill="none" stroke="#16a36b" stroke-width="5" stroke-linecap="round"/><text x="220" y="53" text-anchor="middle" class="h3">Health Monitoring</text><text x="220" y="81" text-anchor="middle" class="body">App · GitLab · Disk</text><text x="220" y="106" text-anchor="middle" class="body">Backup freshness</text><text x="172" y="146" text-anchor="middle" class="small">Automated every 5 minutes</text></g>
+  <g transform="translate(885 1085)"><rect class="card" width="345" height="170"/><circle cx="62" cy="64" r="34" fill="#efe9ff"/><path class="icon" d="M48 43h28M48 57h28M48 71h28M55 34v47M69 34v47"/><text x="220" y="53" text-anchor="middle" class="h3">OpenRouter AI</text><text x="220" y="81" text-anchor="middle" class="body">Pipeline failure analysis</text><text x="220" y="106" text-anchor="middle" class="body">Cause · Evidence · Suggested fix</text><text x="172" y="146" text-anchor="middle" class="small">English team summary</text></g>
+  <g transform="translate(1275 1085)"><rect class="card" width="345" height="170"/><circle cx="62" cy="64" r="34" fill="#dff4ff"/><path d="M39 62l45-19-11 45-14-14-11 10 3-17z" fill="#278acb"/><text x="220" y="53" text-anchor="middle" class="h3">Telegram Alerts</text><text x="220" y="81" text-anchor="middle" class="body">Success · Failure</text><text x="220" y="106" text-anchor="middle" class="body">AI diagnosis · Pipeline link</text><text x="172" y="146" text-anchor="middle" class="small">Immediate team notification</text></g>
+  <g transform="translate(1665 1085)"><rect class="card" width="345" height="170"/><circle cx="62" cy="64" r="34" fill="#e8f3ff"/><path d="M37 77h50c11 0 19-7 19-17 0-9-7-16-16-17-4-14-14-22-27-22-14 0-25 10-28 24-9 2-15 8-15 16 0 9 7 16 17 16z" fill="none" stroke="#2878bd" stroke-width="4"/><path d="M63 40v26M52 56l11 10 11-10" fill="none" stroke="#2878bd" stroke-width="4"/><text x="220" y="53" text-anchor="middle" class="h3">Azure Blob Backup</text><text x="220" y="81" text-anchor="middle" class="body">Off-site GitLab archive</text><text x="220" y="106" text-anchor="middle" class="body">Integrity verification</text><text x="172" y="146" text-anchor="middle" class="small">Daily at 03:00</text></g>
+  <g transform="translate(2055 1085)"><rect class="card" width="250" height="170"/><circle cx="55" cy="64" r="34" fill="#fff2df"/><path d="M37 78h36V52H37zM44 44h22v8M45 62h20M45 69h20" fill="none" stroke="#b66a13" stroke-width="4"/><text x="162" y="53" text-anchor="middle" class="h3">Audit Trail</text><text x="162" y="81" text-anchor="middle" class="body">Logs</text><text x="162" y="106" text-anchor="middle" class="body">Artifacts</text><text x="125" y="146" text-anchor="middle" class="small">Traceable evidence</text></g>
+
+  <path class="ops" d="M1405 735V1035H1058V1073"/><text x="1240" y="1018" text-anchor="middle" class="small">Failure context</text>
+  <path class="ops" d="M1230 1170H1263"/>
+  <path class="ops" d="M840 1170H873"/>
+  <path class="backup" d="M1990 880V1035H1838V1073"/>
+  <path class="backup" d="M450 1170H483"/>
+  <path class="backup" d="M2010 1170H2043"/>
+
+  <!-- Footer legend -->
+  <g transform="translate(80 1370)">
+    <line x1="0" y1="0" x2="65" y2="0" stroke="#173654" stroke-width="3" marker-end="url(#arrowCode)"/><text x="80" y="6" class="small">Code / user flow</text>
+    <line x1="245" y1="0" x2="310" y2="0" stroke="#2878bd" stroke-width="3" marker-end="url(#arrowArtifact)"/><text x="325" y="6" class="small">Artifact / deployment flow</text>
+    <line x1="555" y1="0" x2="620" y2="0" stroke="#7a55c7" stroke-width="2.6" stroke-dasharray="9 7" marker-end="url(#arrowOps)"/><text x="635" y="6" class="small">AI / operations flow</text>
+    <line x1="835" y1="0" x2="900" y2="0" stroke="#60758d" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#arrowBackup)"/><text x="915" y="6" class="small">Backup / support flow</text>
+    <circle cx="1225" cy="0" r="8" fill="#20b875"/><text x="1243" y="6" class="small">Automated and healthy</text>
+    <text x="2380" y="6" text-anchor="end" class="small">FoxFlow · Secure Software Delivery on Azure</text>
+  </g>
+</svg>
