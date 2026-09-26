@@ -51,10 +51,11 @@ The verified health response is:
 ![FoxFlow DevSecOps architecture](docs/foxflow-architecture.svg)
 
 ```text
-Developer -> GitHub / GitLab
-                    |
-                    v
-              GitLab Runner
+Developer -> GitLab (primary workspace)
+                 |              \
+                 |               -> GitHub archive
+                 v
+           GitLab Runner
                     |
         build -> test -> Trivy scan
                     |

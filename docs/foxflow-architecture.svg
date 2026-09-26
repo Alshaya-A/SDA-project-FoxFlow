@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title desc">
   <title id="title">FoxFlow DevSecOps architecture</title>
-  <desc id="desc">Developer changes move from GitHub to self-hosted GitLab, through build, test, Trivy security scan, deployment, and notification stages, then into the FoxFlow application on Azure with AI analysis, Telegram alerts, monitoring, and backups.</desc>
+  <desc id="desc">Developer changes move into self-hosted GitLab as the primary DevOps platform, through build, test, Trivy security scan, deployment, and notification stages, then into the FoxFlow application on Azure. GitHub stores an archive copy, while AI analysis, Telegram alerts, monitoring, and backups support operations.</desc>
   <defs>
     <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
       <path d="M1 1l10 5-10 5z" fill="#27364a"/>
@@ -48,19 +48,19 @@
     <circle cx="73" cy="93" r="7" fill="#fff"/>
   </g>
 
-  <!-- GitHub -->
-  <g transform="translate(290 161)">
-    <text x="75" y="-18" text-anchor="middle" class="tiny">SOURCE REPOSITORY</text>
+  <!-- GitHub archive -->
+  <g transform="translate(760 161)">
+    <text x="75" y="-18" text-anchor="middle" class="tiny">BACKUP REPOSITORY</text>
     <rect class="box" x="0" y="0" width="150" height="116"/>
     <circle cx="47" cy="47" r="26" fill="#20252d"/>
     <path d="M34 47c0-10 7-17 13-17s13 7 13 17c0 8-4 14-10 17v12h-7V64c-5-3-9-9-9-17z" fill="#fff"/>
     <text x="83" y="53" class="label">GitHub</text>
-    <text x="75" y="94" text-anchor="middle" class="sub">Main source</text>
+    <text x="75" y="94" text-anchor="middle" class="sub">Code archive</text>
   </g>
 
   <!-- GitLab -->
-  <g transform="translate(555 145)">
-    <text x="155" y="-18" text-anchor="middle" class="tiny">SELF-HOSTED REPOSITORY</text>
+  <g transform="translate(300 145)">
+    <text x="155" y="-18" text-anchor="middle" class="tiny">PRIMARY DEVOPS PLATFORM</text>
     <rect class="box" x="0" y="0" width="310" height="146"/>
     <path d="M34 64L53 16l18 48 18-48 19 48-37 27z" fill="#f0522d"/>
     <path d="M53 16l18 48H34z" fill="#e24329"/><path d="M89 16L71 64h37z" fill="#fc6d26"/>
@@ -68,17 +68,17 @@
     <text x="155" y="111" text-anchor="middle" class="sub">Repository · API · CI/CD</text>
   </g>
 
-  <path class="flow" d="M174 216H278"/>
-  <path class="arrowHead" d="M278 216l-14-8v16z"/>
+  <path class="flow" d="M174 216H288"/>
+  <path class="arrowHead" d="M288 216l-14-8v16z"/>
   <text x="225" y="202" text-anchor="middle" class="sub">Commit</text>
-  <path class="flow" d="M440 216H543"/>
-  <path class="arrowHead" d="M543 216l-14-8v16z"/>
-  <text x="492" y="202" text-anchor="middle" class="sub">Sync / Push</text>
+  <path class="support" d="M610 216H748"/>
+  <path class="supportHead" d="M748 216l-14-8v16z"/>
+  <text x="679" y="202" text-anchor="middle" class="sub">Archive / Backup</text>
 
   <!-- Pipeline trigger -->
-  <path class="flow" d="M710 292V355"/>
-  <path class="arrowHead" d="M710 355l-8-14h16z"/>
-  <text x="730" y="330" class="sub">Pipeline triggered</text>
+  <path class="flow" d="M455 292V355"/>
+  <path class="arrowHead" d="M455 355l-8-14h16z"/>
+  <text x="475" y="330" class="sub">Pipeline triggered</text>
 
   <!-- CI/CD dashed area -->
   <rect x="55" y="360" width="1325" height="430" rx="20" fill="#fbfcfe" stroke="#58687b" stroke-width="2.5" stroke-dasharray="12 10"/>
