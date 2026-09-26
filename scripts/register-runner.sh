@@ -10,7 +10,7 @@ if [[ -z "${GITLAB_RUNNER_TOKEN:-}" ]]; then
   exit 1
 fi
 
-GITLAB_URL="http://${GITLAB_HOSTNAME}:${GITLAB_HTTP_PORT}"
+GITLAB_URL="${GITLAB_EXTERNAL_URL:-http://${GITLAB_HOSTNAME}:${GITLAB_HTTP_PORT}}"
 log_info "Registering GitLab Runner against ${GITLAB_URL}..."
 
 docker run --rm -v "${FOXFLOW_DATA_PATH}/gitlab-runner/config:/etc/gitlab-runner" \

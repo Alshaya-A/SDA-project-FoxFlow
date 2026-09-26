@@ -10,7 +10,8 @@ covers deployment, day-to-day operations, and configuration for the platform lay
 - **GitLab CE** version pinned in `.env` (currently 17.4.2-ce.0)
 - Runs in a single container named `foxflow-gitlab`
 - Exposes three ports on the host:
-  - HTTP: 8080 → 80 (container)
+  - Public HTTPS: `https://gitlab.20-127-65-116.sslip.io`
+  - Internal proxy target: 8080 → 80 (container)
   - HTTPS: 8443 → 443 (container)
   - SSH: 2222 → 22 (container)
 - Non-standard host ports chosen to avoid conflict with the host's own SSH (port 22)
@@ -35,6 +36,7 @@ Template: `docker/.env.example`.
 Key variables:
 - `GITLAB_VERSION` - pin to a specific CE version
 - `GITLAB_HOSTNAME` - `localhost` for local dev, public IP for the Azure VM
+- `GITLAB_EXTERNAL_URL` - public HTTPS URL used by GitLab and Runner
 - `GITLAB_HTTP_PORT` / `GITLAB_HTTPS_PORT` / `GITLAB_SSH_PORT` - host ports
 - `FOXFLOW_DATA_PATH` - only used with bind mounts (Azure VM setup)
 - `AZURE_BACKUP_STORAGE_ACCOUNT` / `AZURE_BACKUP_CONTAINER` - used by backup.sh

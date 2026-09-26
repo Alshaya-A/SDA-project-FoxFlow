@@ -6,7 +6,7 @@ application deployed automatically after build, test, and security gates pass.
 
 ## Current status
 
-- GitLab: `http://20.127.65.116:8080`
+- GitLab: `https://gitlab.20-127-65-116.sslip.io`
 - Application: `https://foxflow.20-127-65-116.sslip.io`
 - Operations dashboard: `https://foxflow.20-127-65-116.sslip.io/dashboard`
 - Health endpoint: `https://foxflow.20-127-65-116.sslip.io/health`
@@ -61,7 +61,7 @@ Developer -> GitHub / GitLab
        Azure VM: application on port 3000
 ```
 
-The Azure VM also hosts GitLab on port `8080`, GitLab SSH on `2222`, and the
+The Azure VM also hosts GitLab behind HTTPS, GitLab SSH on `2222`, and the
 internal registry on `5050`. Persistent GitLab data is mounted under
 `/srv/foxflow` on the attached data disk.
 

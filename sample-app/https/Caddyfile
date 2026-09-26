@@ -10,3 +10,16 @@
 
   reverse_proxy host.docker.internal:3000
 }
+
+{$GITLAB_HTTPS_HOST} {
+  encode zstd gzip
+
+  header {
+    Strict-Transport-Security "max-age=31536000"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    -Server
+  }
+
+  reverse_proxy host.docker.internal:8080
+}
