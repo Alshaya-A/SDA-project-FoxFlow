@@ -48,10 +48,12 @@ The verified health response is:
 
 ## Architecture
 
-![FoxFlow presentation architecture](docs/foxflow-architecture-presentation.svg)
+![FoxFlow modern presentation architecture](docs/foxflow-architecture-modern.svg)
 
 The detailed technical diagram is available in
 [`docs/foxflow-architecture-advanced.svg`](docs/foxflow-architecture-advanced.svg),
+the light presentation version is available in
+[`docs/foxflow-architecture-presentation.svg`](docs/foxflow-architecture-presentation.svg),
 and the Arabic presentation script is available in
 [`docs/architecture-presentation-script-ar.md`](docs/architecture-presentation-script-ar.md).
 
