@@ -48,7 +48,12 @@ The verified health response is:
 
 ## Architecture
 
-![FoxFlow advanced DevSecOps architecture](docs/foxflow-architecture-advanced.svg)
+![FoxFlow presentation architecture](docs/foxflow-architecture-presentation.svg)
+
+The detailed technical diagram is available in
+[`docs/foxflow-architecture-advanced.svg`](docs/foxflow-architecture-advanced.svg),
+and the Arabic presentation script is available in
+[`docs/architecture-presentation-script-ar.md`](docs/architecture-presentation-script-ar.md).
 
 ```text
 Developer -> GitLab (primary workspace)
