@@ -125,6 +125,14 @@ backup freshness changes to warning/failure, and sends a recovery message when
 the condition clears. Pipeline success and failure notifications use the same
 Telegram group.
 
+`foxflow-copilot.service` adds conversational infrastructure to that Telegram
+group. It understands Arabic and English requests and replies in English. The
+available commands are `/status`, `/backup`, `/pipeline`,
+`/logs gitlab|app|runner`, and `/restart gitlab|app|runner`. OpenRouter may only
+select a tool declared in `sample-app/copilot/ai-tools.json`; it cannot generate
+or execute shell commands. A restart requires `/confirm <code>` from the same
+Telegram user within five minutes.
+
 Environment values belong in `docker/.env`, which must remain uncommitted and
 mode `600`. See [platform operations](docs/platform.md) and
 [backup and restore](docs/backup-restore.md).

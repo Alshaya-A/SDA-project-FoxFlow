@@ -1,0 +1,23 @@
+[Unit]
+Description=FoxFlow AI DevOps Copilot for Telegram
+After=docker.service network-online.target foxflow-monitor.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__FOXFLOW_USER__
+Group=__FOXFLOW_USER__
+EnvironmentFile=/etc/foxflow/copilot.env
+WorkingDirectory=/opt/foxflow/copilot
+ExecStart=/opt/foxflow/copilot/ai-copilot.sh
+Restart=always
+RestartSec=5s
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=read-only
+ProtectSystem=full
+ReadWritePaths=/var/lib/foxflow-copilot /srv/foxflow
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

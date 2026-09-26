@@ -49,6 +49,13 @@ GitHub هو مصدر الكود؛ جذر مشروع GitLab يجب أن يحتو�
 | OPENROUTER_API_KEY | Masked and hidden، Protected | مفتاح OpenRouter لتحليل فشل Pipeline؛ لا يكتب في Git |
 | OPENROUTER_MODEL | Variable اختياري | نموذج OpenRouter؛ الافتراضي `openrouter/free` |
 | GITLAB_API_TOKEN | Masked and hidden، Protected | Project access token بصلاحية `read_api` لقراءة سجل المهمة الفاشلة؛ عند غيابه يحاول السكربت استخدام `CI_JOB_TOKEN` |
+| TELEGRAM_ADMIN_USER_IDS | Variable اختياري، Protected | قائمة معرفات مستخدمي Telegram المفصولة بفواصل والمسموح لها بطلب إعادة تشغيل الخدمات؛ عند غيابه يبقى التأكيد المزدوج مطلوبًا من نفس المستخدم |
+
+بعد النشر الناجح يثبّت Job النشر خدمة `foxflow-copilot.service` على الخادم. تفهم
+الخدمة العربية والإنجليزية وترد بالإنجليزية، وتوفر `/status` و`/backup`
+و`/pipeline` و`/logs` و`/restart`. ملف `ai-tools.json` هو قائمة السماح الوحيدة؛
+لا يتحول نص المستخدم أو رد OpenRouter إلى أمر shell. تتطلب إعادة التشغيل رمز
+`/confirm` صالحًا خمس دقائق ومن نفس مستخدم Telegram.
 
 لعرض فشل آمن أمام اللجنة، شغّل Pipeline على الفرع الرئيسي المحمي مع المتغير
 `FAILURE_DEMO=true`. تنشئ مهمة `failure_demo` خطأ Health Check تجريبيًا، دون تغيير

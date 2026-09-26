@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "reply_language": "English",
+  "tools": {
+    "check_status": {
+      "description": "Check GitLab, Runner, application, HTTP health, memory, disk, backup freshness, and the latest pipeline.",
+      "risk": "read",
+      "arguments": {}
+    },
+    "run_backup": {
+      "description": "Create a GitLab backup and upload it to the configured Azure Blob container.",
+      "risk": "write",
+      "arguments": {}
+    },
+    "get_pipeline": {
+      "description": "Get the latest GitLab pipeline. If it failed, read the failed job trace and explain the cause.",
+      "risk": "read",
+      "arguments": {}
+    },
+    "read_logs": {
+      "description": "Read the last 50 log lines from one approved FoxFlow service.",
+      "risk": "read",
+      "arguments": {
+        "service": ["gitlab", "app", "runner"]
+      }
+    },
+    "restart_service": {
+      "description": "Restart one approved FoxFlow service after a second confirmation from the same Telegram user.",
+      "risk": "confirmation",
+      "arguments": {
+        "service": ["gitlab", "app", "runner"]
+      }
+    }
+  }
+}

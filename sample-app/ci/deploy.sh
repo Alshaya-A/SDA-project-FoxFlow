@@ -33,3 +33,13 @@ if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then
 else
   echo 'Telegram variables are not configured; host monitoring was not installed.' >&2
 fi
+
+# Install the conversational operations bot only when every required secret is
+# available. Its model can select approved tools but cannot execute free-form
+# shell commands; service restarts also require a second Telegram confirmation.
+if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ] && \
+   [ -n "${OPENROUTER_API_KEY:-}" ] && [ -n "${GITLAB_API_TOKEN:-}" ]; then
+  sh ci/install-copilot.sh
+else
+  echo 'AI Copilot variables are incomplete; the host Copilot was not installed.' >&2
+fi
