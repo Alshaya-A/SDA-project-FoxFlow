@@ -66,6 +66,7 @@ ssh "$remote" "
   fi
   sudo install -d -o root -g root -m 0755 /opt/foxflow/copilot
   sudo install -d -o foxflow-copilot -g foxflow-copilot -m 0700 /var/lib/foxflow-copilot
+  sudo chown -R foxflow-copilot:foxflow-copilot /var/lib/foxflow-copilot
   sudo install -d -o root -g root -m 0755 /etc/foxflow
   sudo install -o root -g root -m 0644 '$remote_dir/ai-tools.json' /opt/foxflow/copilot/ai-tools.json
   sudo install -o root -g root -m 0755 '$remote_dir/ai_copilot.py' /opt/foxflow/copilot/ai_copilot.py
