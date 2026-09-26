@@ -1,0 +1,256 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title desc">
+  <title id="title">FoxFlow DevSecOps architecture</title>
+  <desc id="desc">Developer changes move from GitHub to self-hosted GitLab, through build, test, Trivy security scan, deployment, and notification stages, then into the FoxFlow application on Azure with AI analysis, Telegram alerts, monitoring, and backups.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M1 1l10 5-10 5z" fill="#27364a"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#0f2742" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .title{font:700 38px Inter,Arial,sans-serif;fill:#10233f;letter-spacing:.3px}
+      .section{font:700 27px Inter,Arial,sans-serif;fill:#f0522d;letter-spacing:.6px}
+      .label{font:700 20px Inter,Arial,sans-serif;fill:#14243b}
+      .sub{font:500 16px Inter,Arial,sans-serif;fill:#52647a}
+      .tiny{font:600 14px Inter,Arial,sans-serif;fill:#62748a}
+      .box{fill:#fff;stroke:#9aa8b8;stroke-width:2.2;rx:12;filter:url(#shadow)}
+      .flow{fill:none;stroke:#27364a;stroke-width:2.4;marker-end:url(#arrow)}
+      .support{fill:none;stroke:#50657f;stroke-width:2;stroke-dasharray:7 6;marker-end:url(#arrow)}
+      .arrowHead{fill:#27364a}
+      .supportHead{fill:#50657f}
+      .iconLine{fill:none;stroke:#173654;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+    </style>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#ffffff"/>
+
+  <!-- FoxFlow mark and title -->
+  <g transform="translate(52 10)">
+    <rect x="15" y="0" width="78" height="20" rx="4" fill="#173654"/>
+    <circle cx="28" cy="10" r="4" fill="#66f0b5"/>
+    <circle cx="42" cy="10" r="4" fill="#ffd166"/>
+    <path d="M8 35L30 22l24 11 24-11 22 13-8 46-38 24L16 81z" fill="#ff6b35" stroke="#173654" stroke-width="4"/>
+    <path d="M26 50l18 9 10-12 10 12 18-9-8 28-20 13-20-13z" fill="#fff2df"/>
+    <circle cx="39" cy="63" r="4" fill="#173654"/><circle cx="69" cy="63" r="4" fill="#173654"/>
+    <path d="M49 73h10l-5 7z" fill="#173654"/>
+    <text x="122" y="53" class="title">FOXFLOW DEVSECOPS ARCHITECTURE</text>
+    <text x="124" y="82" class="sub">Secure CI/CD · AI-assisted operations · Azure deployment</text>
+  </g>
+
+  <!-- Developer -->
+  <g transform="translate(55 160)">
+    <text x="73" y="-18" text-anchor="middle" class="label">Developer</text>
+    <circle cx="73" cy="31" r="27" fill="#27364a"/>
+    <circle cx="73" cy="27" r="15" fill="#fff"/>
+    <path d="M29 109c5-34 22-51 44-51s39 17 44 51" fill="#27364a"/>
+    <rect x="41" y="71" width="64" height="45" rx="4" fill="#52647a" stroke="#27364a" stroke-width="3"/>
+    <circle cx="73" cy="93" r="7" fill="#fff"/>
+  </g>
+
+  <!-- GitHub -->
+  <g transform="translate(290 161)">
+    <text x="75" y="-18" text-anchor="middle" class="tiny">SOURCE REPOSITORY</text>
+    <rect class="box" x="0" y="0" width="150" height="116"/>
+    <circle cx="47" cy="47" r="26" fill="#20252d"/>
+    <path d="M34 47c0-10 7-17 13-17s13 7 13 17c0 8-4 14-10 17v12h-7V64c-5-3-9-9-9-17z" fill="#fff"/>
+    <text x="83" y="53" class="label">GitHub</text>
+    <text x="75" y="94" text-anchor="middle" class="sub">Main source</text>
+  </g>
+
+  <!-- GitLab -->
+  <g transform="translate(555 145)">
+    <text x="155" y="-18" text-anchor="middle" class="tiny">SELF-HOSTED REPOSITORY</text>
+    <rect class="box" x="0" y="0" width="310" height="146"/>
+    <path d="M34 64L53 16l18 48 18-48 19 48-37 27z" fill="#f0522d"/>
+    <path d="M53 16l18 48H34z" fill="#e24329"/><path d="M89 16L71 64h37z" fill="#fc6d26"/>
+    <text x="128" y="67" font-family="Inter,Arial,sans-serif" font-size="42" font-weight="700" fill="#171321">GitLab CE</text>
+    <text x="155" y="111" text-anchor="middle" class="sub">Repository · API · CI/CD</text>
+  </g>
+
+  <path class="flow" d="M174 216H278"/>
+  <path class="arrowHead" d="M278 216l-14-8v16z"/>
+  <text x="225" y="202" text-anchor="middle" class="sub">Commit</text>
+  <path class="flow" d="M440 216H543"/>
+  <path class="arrowHead" d="M543 216l-14-8v16z"/>
+  <text x="492" y="202" text-anchor="middle" class="sub">Sync / Push</text>
+
+  <!-- Pipeline trigger -->
+  <path class="flow" d="M710 292V355"/>
+  <path class="arrowHead" d="M710 355l-8-14h16z"/>
+  <text x="730" y="330" class="sub">Pipeline triggered</text>
+
+  <!-- CI/CD dashed area -->
+  <rect x="55" y="360" width="1325" height="430" rx="20" fill="#fbfcfe" stroke="#58687b" stroke-width="2.5" stroke-dasharray="12 10"/>
+  <text x="718" y="406" text-anchor="middle" class="section">CONTINUOUS INTEGRATION &amp; DELIVERY</text>
+  <text x="718" y="435" text-anchor="middle" class="sub">Every protected main-branch change passes all gates before production</text>
+
+  <!-- Runner label -->
+  <g transform="translate(78 463)">
+    <rect x="0" y="0" width="185" height="52" rx="26" fill="#eaf3ff" stroke="#4b78b8" stroke-width="2"/>
+    <circle cx="28" cy="26" r="14" fill="#4b78b8"/>
+    <path d="M21 26h14M28 19v14" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+    <text x="103" y="32" text-anchor="middle" class="sub">GitLab Runner</text>
+  </g>
+
+  <!-- Stage cards -->
+  <g transform="translate(92 545)">
+    <rect class="box" width="210" height="126"/>
+    <circle cx="105" cy="39" r="25" fill="#dff4ff"/>
+    <path class="iconLine" d="M88 47h34l-4-25H92zM95 22v-8h20v8"/>
+    <text x="105" y="88" text-anchor="middle" class="label">BUILD</text>
+    <text x="105" y="112" text-anchor="middle" class="sub">Docker image</text>
+  </g>
+
+  <g transform="translate(344 545)">
+    <rect class="box" width="210" height="126"/>
+    <circle cx="105" cy="39" r="25" fill="#e9f9ee"/>
+    <path class="iconLine" d="M96 17v17L83 54h44l-13-20V17M92 17h26M91 47h28"/>
+    <text x="105" y="88" text-anchor="middle" class="label">TEST</text>
+    <text x="105" y="112" text-anchor="middle" class="sub">Node.js + Copilot</text>
+  </g>
+
+  <g transform="translate(596 545)">
+    <rect class="box" width="210" height="126"/>
+    <circle cx="105" cy="39" r="25" fill="#fff2df"/>
+    <path d="M105 14l22 9v17c0 14-9 24-22 31-13-7-22-17-22-31V23z" fill="none" stroke="#b66a13" stroke-width="5"/>
+    <path d="M94 41l8 8 15-18" fill="none" stroke="#b66a13" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="105" y="88" text-anchor="middle" class="label">SECURITY</text>
+    <text x="105" y="112" text-anchor="middle" class="sub">Trivy scan</text>
+  </g>
+
+  <g transform="translate(848 545)">
+    <rect class="box" width="210" height="126"/>
+    <circle cx="105" cy="39" r="25" fill="#eeeaff"/>
+    <path class="iconLine" d="M105 14l22 12v26l-22 12-22-12V26zM83 26l22 12 22-12M105 38v26"/>
+    <text x="105" y="88" text-anchor="middle" class="label">DEPLOY</text>
+    <text x="105" y="112" text-anchor="middle" class="sub">Compose via SSH</text>
+  </g>
+
+  <g transform="translate(1100 545)">
+    <rect class="box" width="210" height="126"/>
+    <circle cx="105" cy="39" r="25" fill="#e5fff6"/>
+    <path class="iconLine" d="M91 52h28l-4-7V34c0-8-4-14-10-14s-10 6-10 14v11zM101 58h8"/>
+    <text x="105" y="88" text-anchor="middle" class="label">NOTIFY</text>
+    <text x="105" y="112" text-anchor="middle" class="sub">AI + Telegram</text>
+  </g>
+
+  <path class="flow" d="M303 608H332"/>
+  <path class="arrowHead" d="M332 608l-14-8v16z"/>
+  <path class="flow" d="M555 608H584"/>
+  <path class="arrowHead" d="M584 608l-14-8v16z"/>
+  <path class="flow" d="M807 608H836"/>
+  <path class="arrowHead" d="M836 608l-14-8v16z"/>
+  <path class="flow" d="M1059 608H1088"/>
+  <path class="arrowHead" d="M1088 608l-14-8v16z"/>
+
+  <!-- Registry -->
+  <g transform="translate(300 695)">
+    <rect x="0" y="0" width="330" height="72" rx="10" fill="#eaf3ff" stroke="#4b78b8" stroke-width="2"/>
+    <path d="M24 16h34v28H24zM31 9h20v7M33 25h16M33 34h16" fill="none" stroke="#315d93" stroke-width="3"/>
+    <text x="196" y="29" text-anchor="middle" class="label">Container Registry</text>
+    <text x="196" y="54" text-anchor="middle" class="tiny">Private network · immutable image</text>
+  </g>
+  <path class="support" d="M197 672C197 730 250 731 288 731"/>
+  <path class="supportHead" d="M288 731l-14-8v16z"/>
+  <path class="support" d="M953 672C953 731 684 731 642 731"/>
+  <path class="supportHead" d="M642 731l14-8v16z"/>
+
+  <!-- Azure runtime -->
+  <g transform="translate(1430 285)">
+    <rect x="0" y="0" width="345" height="535" rx="18" fill="#f7fbff" stroke="#2878bd" stroke-width="3" filter="url(#shadow)"/>
+    <text x="172" y="43" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="26" font-weight="700" fill="#1372b9">AZURE VM</text>
+    <text x="172" y="70" text-anchor="middle" class="tiny">Ubuntu · Docker · NSG protected</text>
+
+    <rect x="40" y="97" width="265" height="78" rx="10" fill="#fff" stroke="#4b78b8" stroke-width="2"/>
+    <circle cx="79" cy="136" r="23" fill="#2d6b54"/>
+    <text x="79" y="144" text-anchor="middle" font-family="Arial" font-size="25" font-weight="700" fill="#fff">C</text>
+    <text x="183" y="129" text-anchor="middle" class="label">Caddy HTTPS</text>
+    <text x="183" y="153" text-anchor="middle" class="sub">TLS · Ports 80 / 443</text>
+
+    <rect x="40" y="200" width="265" height="110" rx="10" fill="#fff" stroke="#24a56a" stroke-width="2"/>
+    <circle cx="79" cy="247" r="25" fill="#66f0b5"/>
+    <path d="M66 248l9 9 18-22" fill="none" stroke="#163d35" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="190" y="238" text-anchor="middle" class="label">FoxFlow App</text>
+    <text x="190" y="264" text-anchor="middle" class="sub">Home · Login · Dashboard</text>
+    <text x="190" y="287" text-anchor="middle" class="tiny">/health · GitLab API</text>
+
+    <rect x="40" y="337" width="265" height="88" rx="10" fill="#fff" stroke="#9aa8b8" stroke-width="2"/>
+    <text x="172" y="370" text-anchor="middle" class="label">Platform Services</text>
+    <text x="172" y="396" text-anchor="middle" class="sub">GitLab · Runner · Registry</text>
+
+    <rect x="40" y="449" width="265" height="58" rx="10" fill="#eef1f5" stroke="#9aa8b8" stroke-width="2"/>
+    <text x="172" y="475" text-anchor="middle" class="label">Persistent Data Disk</text>
+    <text x="172" y="496" text-anchor="middle" class="tiny">Repos · Logs · Artifacts · Backups</text>
+  </g>
+
+  <path class="flow" d="M953 533C953 478 1255 468 1418 500"/>
+  <path class="arrowHead" d="M1418 500l-13-9-2 16z"/>
+  <text x="1225" y="457" text-anchor="middle" class="sub">Deploy approved image</text>
+
+  <!-- End user -->
+  <g transform="translate(1816 475)">
+    <circle cx="0" cy="0" r="46" fill="#fff" stroke="#27364a" stroke-width="2.5"/>
+    <circle cx="0" cy="-12" r="14" fill="#27364a"/>
+    <path d="M-25 28c3-20 12-31 25-31s22 11 25 31" fill="#27364a"/>
+    <text x="0" y="72" text-anchor="middle" class="label">End Users</text>
+    <text x="0" y="95" text-anchor="middle" class="tiny">HTTPS access</text>
+  </g>
+  <path class="flow" d="M1775 475H1798"/>
+  <path class="arrowHead" d="M1798 475l-14-8v16z"/>
+
+  <!-- AI and alert services -->
+  <g transform="translate(970 855)">
+    <rect class="box" x="0" y="0" width="235" height="112"/>
+    <circle cx="48" cy="45" r="26" fill="#efe9ff"/>
+    <path class="iconLine" d="M37 36h22M37 45h22M42 27v36M54 27v36"/>
+    <text x="148" y="43" text-anchor="middle" class="label">OpenRouter AI</text>
+    <text x="148" y="69" text-anchor="middle" class="sub">Failure analysis</text>
+    <text x="117" y="94" text-anchor="middle" class="tiny">Cause · Evidence · Fix</text>
+  </g>
+
+  <g transform="translate(1235 855)">
+    <rect class="box" x="0" y="0" width="220" height="112"/>
+    <circle cx="48" cy="45" r="26" fill="#dff4ff"/>
+    <path d="M31 43l34-14-8 34-10-10-8 7 2-13z" fill="#278acb"/>
+    <text x="143" y="43" text-anchor="middle" class="label">Telegram</text>
+    <text x="143" y="69" text-anchor="middle" class="sub">Team alerts</text>
+    <text x="110" y="94" text-anchor="middle" class="tiny">Success · Failure · Copilot</text>
+  </g>
+
+  <path class="support" d="M1205 672V810H1088V843"/>
+  <path class="supportHead" d="M1088 843l-8-14h16z"/>
+  <path class="flow" d="M1205 911H1223"/>
+  <path class="arrowHead" d="M1223 911l-14-8v16z"/>
+
+  <!-- Monitoring and backup -->
+  <g transform="translate(85 855)">
+    <rect class="box" x="0" y="0" width="330" height="112"/>
+    <path d="M30 70h25l12-35 15 50 14-31h27" fill="none" stroke="#16a36b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="218" y="42" text-anchor="middle" class="label">Proactive Monitoring</text>
+    <text x="218" y="68" text-anchor="middle" class="sub">Services · Disk · Backup freshness</text>
+    <text x="165" y="94" text-anchor="middle" class="tiny">Checks every 5 minutes</text>
+  </g>
+
+  <g transform="translate(505 855)">
+    <rect class="box" x="0" y="0" width="330" height="112"/>
+    <path d="M32 68h58c12 0 20-7 20-17 0-9-7-16-16-17-4-15-15-23-29-23-15 0-27 10-30 25-10 2-16 9-16 17 0 9 6 15 13 15z" fill="#dff4ff" stroke="#2878bd" stroke-width="3"/>
+    <path d="M65 31v27M54 48l11 10 11-10" fill="none" stroke="#2878bd" stroke-width="4" stroke-linecap="round"/>
+    <text x="228" y="42" text-anchor="middle" class="label">Azure Blob Backup</text>
+    <text x="228" y="68" text-anchor="middle" class="sub">Off-site GitLab archive</text>
+    <text x="165" y="94" text-anchor="middle" class="tiny">Daily at 03:00 · integrity verified</text>
+  </g>
+
+  <path class="support" d="M1470 790C1320 842 1115 835 847 912"/>
+  <path class="supportHead" d="M847 912l13-10 3 16z"/>
+  <path class="support" d="M416 912H493"/>
+  <path class="supportHead" d="M493 912l-14-8v16z"/>
+
+  <!-- Legend -->
+  <g transform="translate(85 1015)">
+    <circle cx="8" cy="0" r="7" fill="#16a36b"/><text x="23" y="6" class="tiny">Automated and healthy</text>
+    <line x1="220" y1="0" x2="265" y2="0" stroke="#27364a" stroke-width="2.5" marker-end="url(#arrow)"/><text x="280" y="6" class="tiny">Primary flow</text>
+    <line x1="410" y1="0" x2="455" y2="0" stroke="#50657f" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#arrow)"/><text x="470" y="6" class="tiny">Monitoring / support flow</text>
+    <text x="1740" y="6" text-anchor="end" class="tiny">FoxFlow · Azure DevSecOps Platform</text>
+  </g>
+</svg>

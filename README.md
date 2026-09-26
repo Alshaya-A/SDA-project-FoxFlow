@@ -48,6 +48,8 @@ The verified health response is:
 
 ## Architecture
 
+![FoxFlow DevSecOps architecture](docs/foxflow-architecture.svg)
+
 ```text
 Developer -> GitHub / GitLab
                     |
