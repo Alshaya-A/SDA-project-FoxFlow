@@ -24,6 +24,9 @@ class CopilotSafetyTests(unittest.TestCase):
         self.assertEqual(COPILOT.local_decision("خذ نسخة احتياطية الآن")["tool"], "run_backup")
         self.assertEqual(COPILOT.local_decision("ليش البايب لاين فشل؟")["tool"], "get_pipeline")
 
+    def test_unrelated_group_chat_is_ignored(self):
+        self.assertEqual(COPILOT.local_decision("السلام عليكم يا فريق")["tool"], "ignore")
+
     def test_model_cannot_invent_tool_or_service(self):
         with self.assertRaises(ValueError):
             COPILOT.validate_decision({"tool": "shell", "arguments": {"cmd": "id"}}, self.tools)

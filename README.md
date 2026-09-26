@@ -131,7 +131,8 @@ available commands are `/status`, `/backup`, `/pipeline`,
 `/logs gitlab|app|runner`, and `/restart gitlab|app|runner`. OpenRouter may only
 select a tool declared in `sample-app/copilot/ai-tools.json`; it cannot generate
 or execute shell commands. A restart requires `/confirm <code>` from the same
-Telegram user within five minutes.
+Telegram user within five minutes. Telegram privacy mode is disabled so natural
+group messages reach the bot; unrelated conversation is ignored.
 
 Environment values belong in `docker/.env`, which must remain uncommitted and
 mode `600`. See [platform operations](docs/platform.md) and
