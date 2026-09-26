@@ -64,7 +64,7 @@ ssh "$remote" "
   if ! id foxflow-copilot >/dev/null 2>&1; then
     sudo useradd --system --home-dir /var/lib/foxflow-copilot --shell /usr/sbin/nologin foxflow-copilot
   fi
-  sudo install -d -o root -g root -m 0750 /opt/foxflow/copilot
+  sudo install -d -o root -g root -m 0755 /opt/foxflow/copilot
   sudo install -d -o foxflow-copilot -g foxflow-copilot -m 0700 /var/lib/foxflow-copilot
   sudo install -d -o root -g root -m 0755 /etc/foxflow
   sudo install -o root -g root -m 0644 '$remote_dir/ai-tools.json' /opt/foxflow/copilot/ai-tools.json
