@@ -26,28 +26,29 @@ resource "azurerm_network_security_group" "foxflow_nsg" {
     destination_address_prefix = "*"
   }
 
-  # GitLab HTTP
+  # Public HTTP entry point. Caddy redirects application traffic to HTTPS and
+  # uses this port for ACME certificate validation.
   security_rule {
-    name                       = "Allow-GitLab-HTTP"
+    name                       = "Allow-HTTP"
     priority                   = 110
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_range     = "8080"
+    destination_port_range     = "80"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
 
-  # GitLab HTTPS
+  # Public HTTPS entry point for both GitLab and the FoxFlow application.
   security_rule {
-    name                       = "Allow-GitLab-HTTPS"
+    name                       = "Allow-HTTPS"
     priority                   = 120
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_range     = "8443"
+    destination_port_range     = "443"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
@@ -65,31 +66,8 @@ resource "azurerm_network_security_group" "foxflow_nsg" {
     destination_address_prefix = "*"
   }
 
-  # GitLab Container Registry
-  security_rule {
-    name                       = "Allow-GitLab-Registry"
-    priority                   = 140
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "5050"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  # FoxFlow sample application
-  security_rule {
-    name                       = "Allow-FoxFlow-App"
-    priority                   = 150
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "3000"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
+  # Ports 3000, 5050, 8080, and 8443 deliberately remain private. Caddy is the
+  # only public HTTP entry point; the Runner uses the registry over the VNet.
 }
 
 resource "azurerm_subnet_network_security_group_association" "foxflow_subnet_nsg" {

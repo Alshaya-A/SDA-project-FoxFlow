@@ -14,10 +14,26 @@ case "$remote" in
 esac
 git check-ref-format --branch "$branch" >/dev/null
 cd "$(git rev-parse --show-toplevel)"
-if [[ -n $(git status --porcelain) ]]; then
-  echo 'Commit or move outstanding changes before publishing.' >&2
+if [[ -n $(git status --porcelain --untracked-files=no) ]]; then
+  echo 'Commit or move tracked changes before publishing.' >&2
   exit 1
 fi
-# Only committed sample-app content becomes the GitLab repository root.
-commit=$(git subtree split --prefix=sample-app HEAD)
+# Only committed sample-app content becomes the GitLab repository root. Keep
+# any GitLab-only commits as ancestors so the push remains fast-forward.
+split_commit=$(git subtree split --prefix=sample-app HEAD)
+tree=$(git rev-parse "${split_commit}^{tree}")
+
+if git fetch "$remote" "$branch"; then
+  remote_head=$(git rev-parse FETCH_HEAD)
+  remote_tree=$(git rev-parse "${remote_head}^{tree}")
+  if [[ "$tree" == "$remote_tree" ]]; then
+    echo 'GitLab already contains the current sample-app files.'
+    exit 0
+  fi
+  commit=$(printf 'Publish sample-app from %s\n' "$(git rev-parse --short HEAD)" | \
+    git commit-tree "$tree" -p "$remote_head")
+else
+  commit="$split_commit"
+fi
+
 git push "$remote" "$commit:refs/heads/$branch"

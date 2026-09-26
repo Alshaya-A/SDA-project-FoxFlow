@@ -36,7 +36,9 @@ sudo install -d -m 0755 "$MOUNT_POINT"
 UUID="$(sudo blkid -s UUID -o value "$REAL_DEVICE")"
 FSTAB_LINE="UUID=$UUID $MOUNT_POINT ext4 defaults,nofail 0 2"
 
-if ! grep -Eq "^[^#]+[[:space:]]+$MOUNT_POINT[[:space:]]" /etc/fstab; then
+if ! awk -v mount_point="$MOUNT_POINT" \
+  '$1 !~ /^#/ && $2 == mount_point { found = 1 } END { exit !found }' \
+  /etc/fstab; then
   echo "$FSTAB_LINE" | sudo tee -a /etc/fstab >/dev/null
 fi
 

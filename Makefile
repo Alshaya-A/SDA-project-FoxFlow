@@ -10,9 +10,11 @@ help:
 
 lint:
 	@for script in $(SHELL_SCRIPTS); do bash -n "$$script"; done
+	@shellcheck -S warning $$(git ls-files '*.sh')
 	@terraform -chdir=terraform fmt -check -recursive
 
 test:
 	@cd sample-app && npm test
+	@cd sample-app && python3 -m unittest copilot/test_ai_copilot.py
 
 validate: lint test

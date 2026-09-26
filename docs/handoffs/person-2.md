@@ -32,7 +32,8 @@ From **Person 4 (CI/CD):**
 ## Outputs I Provide
 
 For **Person 4 (CI/CD):**
-- A working GitLab instance at `http://<hostname>:8080`
+- A working GitLab instance at `https://gitlab.<public-ip-with-dashes>.sslip.io`;
+  Caddy forwards it internally to host port `8080`
 - A registered runner ready to pick up pipeline jobs
 - Admin access to configure CI/CD variables
 

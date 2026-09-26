@@ -123,12 +123,19 @@ function renderLogin(error = '') {
 function readForm(req) {
   return new Promise((resolve, reject) => {
     let body = '';
+    let rejected = false;
     req.setEncoding('utf8');
     req.on('data', (chunk) => {
+      if (rejected) return;
       body += chunk;
-      if (body.length > LOGIN_BODY_LIMIT) reject(new Error('request too large'));
+      if (body.length > LOGIN_BODY_LIMIT) {
+        rejected = true;
+        reject(new Error('request too large'));
+      }
     });
-    req.on('end', () => resolve(new URLSearchParams(body)));
+    req.on('end', () => {
+      if (!rejected) resolve(new URLSearchParams(body));
+    });
     req.on('error', reject);
   });
 }
@@ -463,12 +470,13 @@ const server = http.createServer(async (req, res) => {
       const username = String(form.get('username') || '').trim().toLowerCase();
       const password = String(form.get('password') || '');
       const user = dashboardAuth.users.get(username);
-      if (loginLocked(username) || !verifyPassword(user, password)) {
-        recordLoginFailure(username);
+      const failureKey = user ? username : '__unknown__';
+      if (loginLocked(failureKey) || !verifyPassword(user, password)) {
+        recordLoginFailure(failureKey);
         sendHtml(res, 401, renderLogin('invalid'));
         return;
       }
-      loginFailures.delete(username);
+      loginFailures.delete(failureKey);
       redirect(res, '/dashboard', sessionCookie(createSession(username)));
     } catch (_) {
       sendHtml(res, 400, renderLogin('invalid'));

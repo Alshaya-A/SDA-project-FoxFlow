@@ -10,6 +10,11 @@ export FIXTURE_DIR="$repo_dir/tests/deploy-fixture"
 export IMAGE_TAG=node:24-alpine
 export APP_PORT=127.0.0.1:0
 export HEALTH_MODE=healthy
+export CI_API_V4_URL=http://127.0.0.1/api/v4
+export CI_PROJECT_ID=1
+export GITLAB_API_TOKEN=local-fixture-token
+export DASHBOARD_USERS_JSON='[]'
+export DASHBOARD_SESSION_SECRET=local-fixture-session-secret-32-characters
 project="foxflow-member4-test-$(date +%s)-$$"
 compose() {
   docker --context "$context" compose -p "$project" \

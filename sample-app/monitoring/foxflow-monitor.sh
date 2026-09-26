@@ -19,9 +19,12 @@ APP_CONTAINER="${APP_CONTAINER:-foxflow-app-app-1}"
 
 mkdir -p "$STATE_DIR"
 
+declare -A check_status
+declare -A check_detail
+
 set_check() {
-  printf -v "status_$1" '%s' "$2"
-  printf -v "detail_$1" '%s' "$3"
+  check_status["$1"]="$2"
+  check_detail["$1"]="$3"
 }
 
 previous_status() {
@@ -105,8 +108,8 @@ first_run=0
 [[ -f "$STATE_FILE" ]] || first_run=1
 
 for key in gitlab runner app gitlab_http app_http disk backup; do
-  eval "current=\${status_$key}"
-  eval "detail=\${detail_$key}"
+  current="${check_status[$key]}"
+  detail="${check_detail[$key]}"
   previous="$(previous_status "$key")"
   previous="${previous:-unknown}"
   if [[ "$first_run" -eq 0 && "$current" == "$previous" ]]; then
@@ -138,7 +141,7 @@ fi
 
 tmp_state="$(mktemp "$STATE_DIR/state.XXXXXX")"
 for key in gitlab runner app gitlab_http app_http disk backup; do
-  eval "current=\${status_$key}"
+  current="${check_status[$key]}"
   printf '%s=%s\n' "$key" "$current" >> "$tmp_state"
 done
 chmod 0640 "$tmp_state"

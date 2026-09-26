@@ -88,6 +88,13 @@ test('login rejects invalid credentials without identifying the account', async 
   assert.match(res.body, /Invalid username or password/);
 });
 
+test('login rejects oversized request bodies', async () => {
+  const body = new URLSearchParams({ username: 'member', password: 'x'.repeat(5000) }).toString();
+  const res = await request('POST', '/login', { body });
+  assert.strictEqual(res.status, 400);
+  assert.match(res.body, /Invalid username or password/);
+});
+
 test('login creates a secure session and opens the control room', async () => {
   const cookie = await authenticatedCookie();
   const login = await request('POST', '/login', {

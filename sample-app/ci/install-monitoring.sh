@@ -28,6 +28,8 @@ umask 077
   printf 'BACKUP_DIR=/srv/foxflow/data/backups\n'
 } > "$tmp_env"
 
+# The validated remote directory is intentionally expanded by this client.
+# shellcheck disable=SC2029
 ssh "$remote" "umask 077; mkdir -p '$remote_dir'"
 scp monitoring/foxflow-monitor.sh "$remote:$remote_dir/foxflow-monitor"
 scp monitoring/foxflow-monitor.service "$remote:$remote_dir/foxflow-monitor.service"
@@ -35,6 +37,7 @@ scp monitoring/foxflow-monitor.timer "$remote:$remote_dir/foxflow-monitor.timer"
 scp demo/foxflow-failure-demo.sh "$remote:$remote_dir/foxflow-failure-demo"
 scp "$tmp_env" "$remote:$remote_dir/foxflow-monitor.env"
 
+# shellcheck disable=SC2029
 ssh "$remote" "
   set -eu
   sudo install -m 0755 '$remote_dir/foxflow-monitor' /usr/local/sbin/foxflow-monitor

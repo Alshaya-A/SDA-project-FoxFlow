@@ -25,7 +25,7 @@ require_runtime() {
 }
 
 prepare_state() {
-  mkdir -p -m 0750 "$state_dir"
+  install -d -m 0750 "$state_dir"
   if [[ ! -f "$state_dir/state" ]]; then
     printf '%s\n' \
       'gitlab=ok' \

@@ -35,7 +35,7 @@ bash scripts/committee-failure-demo.sh recover
 bash scripts/committee-failure-demo.sh cleanup
 ```
 - Default branch: protected `main`
-- Latest verified deployment: GitLab Pipeline **#5**, commit `8ddb455c`
+- Latest verified protected-dashboard deployment: GitLab Pipeline **#41**
 - Pipeline jobs: `build`, `test`, `security_scan`, `deploy`, and `notify`
 - Off-site GitLab backup: verified in Azure Blob Storage on 21 September 2026
 - Backup schedule: daily at 03:00 on the VM
@@ -63,11 +63,15 @@ Developer -> GitHub / GitLab
           Docker Compose deployment
                     |
                     v
-       Azure VM: application on port 3000
+       Azure VM: Caddy HTTPS on port 443
+                    |
+                    v
+          Application on private port 3000
 ```
 
 The Azure VM also hosts GitLab behind HTTPS, GitLab SSH on `2222`, and the
-internal registry on `5050`. Persistent GitLab data is mounted under
+internal-only registry on `5050`. Ports `3000`, `5050`, `8080`, and `8443`
+are not exposed by the Azure NSG. Persistent GitLab data is mounted under
 `/srv/foxflow` on the attached data disk.
 
 ## Repository layout

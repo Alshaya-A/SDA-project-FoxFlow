@@ -13,6 +13,11 @@ variable "location" {
   default     = "East US"
 }
 
+variable "subscription_id" {
+  description = "Azure subscription ID used to deploy FoxFlow"
+  type        = string
+}
+
 variable "admin_ssh_public_key" {
   description = "OpenSSH public key used by the azureuser account on the VM"
   type        = string

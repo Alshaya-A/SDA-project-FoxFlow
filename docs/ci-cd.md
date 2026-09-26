@@ -2,7 +2,7 @@
 
 ## الحالة
 
-تم تجهيز المسار والتطبيق الحقيقي مع Dockerfile والاختبارات، وتشغيله على GitLab Runner، ونشره على Azure بنجاح. نجح Pipeline رقم 5 بجميع مراحله، وأعاد فحص `GET /health` الخارجي استجابة HTTP 200. الإشعار الحالي تقرير داخلي في GitLab؛ لم تُضف قناة Discord أو بريد خارجي.
+تم تجهيز المسار والتطبيق الحقيقي مع Dockerfile والاختبارات، وتشغيله على GitLab Runner، ونشره على Azure بنجاح. نجح Pipeline رقم 41 بجميع مراحله بعد إضافة حماية لوحة التحكم، وأعاد فحص `GET /health` الخارجي عبر HTTPS استجابة HTTP 200. تصل نتائج النجاح والفشل إلى Telegram، ويحلل OpenRouter سجل المهمة الفاشلة عند توفره.
 GitHub هو مصدر الكود؛ جذر مشروع GitLab يجب أن يحتوي **محتويات sample-app** مباشرة.
 
 ## اتفاق العضو ٣
@@ -33,7 +33,7 @@ GitHub هو مصدر الكود؛ جذر مشروع GitLab يجب أن يحتو�
 - خادم النشر يحتوي Docker مع Compose يدعم `up --wait`؛ حساب النشر يستطيع الوصول إلى Docker عبر SSH.
 - تأكيد هوية خادم SSH من مصدر موثوق وتسليم known_hosts؛ لا تعطّل التحقق من المضيف.
 - حماية الفرع الافتراضي، وحصر أسرار النشر بالفرع المحمي وبيئة production.
-- فتح APP_PORT في شبكة Azure عند الحاجة. النشر الحالي يستخدم المنفذ 3000 على المضيف ويربطه بالمنفذ 3000 داخل الحاوية؛ GitLab ليس ضمن Compose الخاص بالتطبيق.
+- النشر الحالي يربط التطبيق بالمنفذ 3000 على المضيف، لكن Azure NSG لا يعرضه للعامة؛ الوصول الخارجي يمر عبر Caddy وHTTPS على المنفذ 443. GitLab ليس ضمن Compose الخاص بالتطبيق.
 
 ## المتغيرات في GitLab Settings → CI/CD → Variables
 
@@ -51,6 +51,8 @@ GitHub هو مصدر الكود؛ جذر مشروع GitLab يجب أن يحتو�
 | OPENROUTER_MODEL | Variable اختياري | نموذج OpenRouter؛ الافتراضي `openrouter/free` |
 | GITLAB_API_TOKEN | Masked and hidden، Protected | Project access token بصلاحية `read_api` لقراءة سجل المهمة الفاشلة؛ عند غيابه يحاول السكربت استخدام `CI_JOB_TOKEN` |
 | TELEGRAM_ADMIN_USER_IDS | Variable اختياري، Protected | قائمة معرفات مستخدمي Telegram المفصولة بفواصل والمسموح لها بطلب إعادة تشغيل الخدمات؛ عند غيابه يبقى التأكيد المزدوج مطلوبًا من نفس المستخدم |
+| DASHBOARD_USERS_JSON | Variable، Protected | حسابات لوحة التحكم بأسماء المستخدمين وملح وكلمات مرور مشتقة بـscrypt؛ لا يحتوي كلمات مرور صريحة |
+| DASHBOARD_SESSION_SECRET | Masked and hidden، Protected | مفتاح توقيع جلسات لوحة التحكم، بطول 32 محرفًا على الأقل |
 
 بعد النشر الناجح يثبّت Job النشر خدمة `foxflow-copilot.service` على الخادم. تفهم
 الخدمة العربية والإنجليزية وترد بالإنجليزية، وتوفر `/status` و`/backup`
@@ -106,9 +108,9 @@ bash scripts/publish-sample.sh git@YOUR-GITLAB:GROUP/sample-app.git main
 
 ### نتيجة التكامل الفعلية — 21 سبتمبر 2026
 
-- Pipeline رقم 5 على الفرع المحمي `main` نجح خلال 1 دقيقة و34 ثانية.
+- Pipeline رقم 41 على الفرع المحمي `main` نجح في البناء والاختبارات وفحص Trivy والنشر والإشعار.
 - نجحت الوظائف الخمس: `build` و`test` و`security_scan` و`deploy` و`notify`.
 - أضيفت متغيرات النشر الستة إلى GitLab، بما فيها مفتاح SSH وملف `known_hosts` كمتغيري File محميين.
 - أضيفت تنبيهات Telegram للنجاح والفشل، ومراقبة دورية للخدمات والقرص وحداثة النسخة الاحتياطية على الخادم.
 - تعمل الحاوية `foxflow-app-app-1` بحالة `healthy` مع الربط `0.0.0.0:3000->3000/tcp`.
-- أعاد `http://20.127.65.116:3000/health` الاستجابة `HTTP/1.1 200 OK` والجسم `{"status":"ok","service":"foxflow-sample"}`.
+- أعاد `https://foxflow.20-127-65-116.sslip.io/health` الاستجابة `HTTP 200` والجسم `{"status":"ok","service":"foxflow-sample"}`.
