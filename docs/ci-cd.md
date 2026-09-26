@@ -16,7 +16,8 @@ GitHub هو مصدر الكود؛ جذر مشروع GitLab يجب أن يحتو�
 ## المراحل
 
 1. Build: يتحقق من lockfile، ويبني ويرفع صورة إلى GitLab Registry مرتبطة بمعرف commit الكامل.
-2. Test: ينفذ npm ci وnpm test على نفس commit، في Node.js 24.
+2. Test: ينفذ npm ci وnpm test على نفس commit في Node.js 24، ويشغّل اختبارات
+   حماية AI Copilot للتأكد من رفض الأدوات والخدمات غير المسموحة وحجب الأسرار.
 3. Security Scan: يفحص الصورة بـTrivy؛ أي ثغرة HIGH أو CRITICAL أو فشل تشغيل الفاحص يمنع النشر.
 4. Deploy: يعمل فقط على الفرع الافتراضي المحمي وعند DEPLOY_ENABLED=true، بعد نجاح المراحل السابقة. يستخدم SSH وCompose على Docker في الخادم، وينتظر صحة التطبيق حتى 120 ثانية. النشرات متسلسلة عبر resource_group.
 5. Notify: يرسل نتيجة Pipeline باللغة الإنجليزية إلى مجموعة Telegram، وينشئ `pipeline-summary.txt`. عند الفشل يجلب اسم المهمة وسجلها من GitLab، ثم يطلب من OpenRouter شرح السبب والدليل والحل المقترح قبل إرسال الرسالة. إذا تعذر GitLab API أو OpenRouter، يرسل إشعار فشل بديلًا بدل فقدان التنبيه. فشل الإشعار يظهر كتحذير ولا يغيّر نتيجة البناء أو النشر.

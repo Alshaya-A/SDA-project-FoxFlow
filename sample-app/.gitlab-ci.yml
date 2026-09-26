@@ -34,6 +34,12 @@ test:
     - npm ci
     - npm test
 
+copilot_test:
+  stage: test
+  image: python:3.12-alpine
+  script:
+    - python -m unittest discover -s copilot -p 'test_*.py' -v
+
 failure_demo:
   stage: test
   image: alpine:3.22
