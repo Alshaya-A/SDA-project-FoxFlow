@@ -4,19 +4,52 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const INDEX_HTML = fs.readFileSync(path.join(PUBLIC_DIR, 'index.html'));
 const DASHBOARD_HTML = fs.readFileSync(path.join(PUBLIC_DIR, 'dashboard.html'));
+const LOGIN_HTML = fs.readFileSync(path.join(PUBLIC_DIR, 'login.html'), 'utf8');
 
 // The exact health payload is a shared CI contract. Do not change it.
 const HEALTH_BODY = JSON.stringify({ status: 'ok', service: 'foxflow-sample' });
 const DASHBOARD_CACHE_MS = 10_000;
 const REQUEST_TIMEOUT_MS = 12_000;
 const TERMINAL_STATUSES = new Set(['success', 'failed', 'canceled', 'skipped', 'manual']);
+const SESSION_COOKIE = 'foxflow_session';
+const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
+const LOGIN_BODY_LIMIT = 4096;
+const LOGIN_FAILURE_LIMIT = 5;
+const LOGIN_LOCK_MS = 10 * 60 * 1000;
 
 let dashboardCache = { expiresAt: 0, value: null, pending: null };
+const loginFailures = new Map();
+
+function loadAuthConfig() {
+  const secret = process.env.DASHBOARD_SESSION_SECRET || '';
+  let entries = [];
+  try {
+    entries = JSON.parse(process.env.DASHBOARD_USERS_JSON || '[]');
+  } catch (_) {
+    console.error('DASHBOARD_USERS_JSON is invalid JSON; dashboard access is disabled.');
+  }
+  const users = new Map();
+  for (const entry of Array.isArray(entries) ? entries : []) {
+    const username = String(entry.username || '').toLowerCase();
+    if (!/^[a-z0-9._-]{2,40}$/.test(username)) continue;
+    if (!entry.salt || !entry.hash || !entry.name) continue;
+    users.set(username, {
+      username,
+      name: cleanText(entry.name, 80),
+      salt: String(entry.salt),
+      hash: String(entry.hash),
+    });
+  }
+  return { secret, users, ready: secret.length >= 32 && users.size > 0 };
+}
+
+const dashboardAuth = loadAuthConfig();
 
 function sendJson(res, status, value) {
   res.writeHead(status, {
@@ -24,6 +57,108 @@ function sendJson(res, status, value) {
     'Cache-Control': 'no-store',
   });
   res.end(JSON.stringify(value));
+}
+
+function sendHtml(res, status, value) {
+  res.writeHead(status, {
+    'Content-Type': 'text/html; charset=utf-8',
+    'Cache-Control': 'no-store',
+  });
+  res.end(value);
+}
+
+function redirect(res, location, cookie) {
+  const headers = { Location: location, 'Cache-Control': 'no-store' };
+  if (cookie) headers['Set-Cookie'] = cookie;
+  res.writeHead(303, headers);
+  res.end();
+}
+
+function parseCookies(req) {
+  const cookies = new Map();
+  for (const item of String(req.headers.cookie || '').split(';')) {
+    const separator = item.indexOf('=');
+    if (separator < 1) continue;
+    cookies.set(item.slice(0, separator).trim(), item.slice(separator + 1).trim());
+  }
+  return cookies;
+}
+
+function sessionSignature(payload) {
+  return crypto.createHmac('sha256', dashboardAuth.secret).update(payload).digest('base64url');
+}
+
+function createSession(username) {
+  const payload = Buffer.from(JSON.stringify({ username, expiresAt: Date.now() + SESSION_TTL_MS }))
+    .toString('base64url');
+  return `${payload}.${sessionSignature(payload)}`;
+}
+
+function readSession(req) {
+  if (!dashboardAuth.ready) return null;
+  const token = parseCookies(req).get(SESSION_COOKIE) || '';
+  const [payload, signature, extra] = token.split('.');
+  if (!payload || !signature || extra) return null;
+  const expected = Buffer.from(sessionSignature(payload));
+  const actual = Buffer.from(signature);
+  if (actual.length !== expected.length || !crypto.timingSafeEqual(actual, expected)) return null;
+  try {
+    const value = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+    if (!value.username || value.expiresAt < Date.now()) return null;
+    return dashboardAuth.users.get(value.username) || null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function sessionCookie(token, maxAge = Math.floor(SESSION_TTL_MS / 1000)) {
+  return `${SESSION_COOKIE}=${token}; Path=/; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Strict`;
+}
+
+function renderLogin(error = '') {
+  const message = error ? '<p class="error" role="alert">Invalid username or password.</p>' : '';
+  return LOGIN_HTML.replace('{{LOGIN_ERROR}}', message);
+}
+
+function readForm(req) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.setEncoding('utf8');
+    req.on('data', (chunk) => {
+      body += chunk;
+      if (body.length > LOGIN_BODY_LIMIT) reject(new Error('request too large'));
+    });
+    req.on('end', () => resolve(new URLSearchParams(body)));
+    req.on('error', reject);
+  });
+}
+
+function loginLocked(username) {
+  const entry = loginFailures.get(username);
+  if (!entry) return false;
+  if (entry.lockedUntil > Date.now()) return true;
+  if (entry.lockedUntil) loginFailures.delete(username);
+  return false;
+}
+
+function recordLoginFailure(username) {
+  const previous = loginFailures.get(username) || { count: 0, lockedUntil: 0 };
+  const count = previous.count + 1;
+  loginFailures.set(username, {
+    count,
+    lockedUntil: count >= LOGIN_FAILURE_LIMIT ? Date.now() + LOGIN_LOCK_MS : 0,
+  });
+}
+
+function verifyPassword(user, password) {
+  if (!user || typeof password !== 'string' || password.length < 1 || password.length > 128) return false;
+  try {
+    const actual = crypto.scryptSync(password, Buffer.from(user.salt, 'base64url'), 32);
+    const expected = Buffer.from(user.hash, 'base64url');
+    return actual.length === expected.length && crypto.timingSafeEqual(actual, expected);
+  } catch (_) {
+    return false;
+  }
 }
 
 function cleanText(value, limit = 600) {
@@ -307,12 +442,51 @@ async function dashboardData() {
 }
 
 const server = http.createServer(async (req, res) => {
+  const requestUrl = new URL(req.url, 'http://foxflow.local');
+
+  if (req.method === 'GET' && requestUrl.pathname === '/login') {
+    if (readSession(req)) {
+      redirect(res, '/dashboard');
+      return;
+    }
+    sendHtml(res, dashboardAuth.ready ? 200 : 503, renderLogin());
+    return;
+  }
+
+  if (req.method === 'POST' && requestUrl.pathname === '/login') {
+    if (!dashboardAuth.ready) {
+      sendHtml(res, 503, renderLogin('unavailable'));
+      return;
+    }
+    try {
+      const form = await readForm(req);
+      const username = String(form.get('username') || '').trim().toLowerCase();
+      const password = String(form.get('password') || '');
+      const user = dashboardAuth.users.get(username);
+      if (loginLocked(username) || !verifyPassword(user, password)) {
+        recordLoginFailure(username);
+        sendHtml(res, 401, renderLogin('invalid'));
+        return;
+      }
+      loginFailures.delete(username);
+      redirect(res, '/dashboard', sessionCookie(createSession(username)));
+    } catch (_) {
+      sendHtml(res, 400, renderLogin('invalid'));
+    }
+    return;
+  }
+
+  if (req.method === 'POST' && requestUrl.pathname === '/logout') {
+    redirect(res, '/login', sessionCookie('', 0));
+    return;
+  }
+
   if (req.method !== 'GET') {
     sendJson(res, 405, { error: 'method not allowed' });
     return;
   }
 
-  if (req.url === '/health') {
+  if (requestUrl.pathname === '/health') {
     if (process.env.FOXFLOW_DEMO_FAIL === 'true') {
       sendJson(res, 503, { status: 'error', service: 'foxflow-sample', demo: true });
       return;
@@ -322,7 +496,28 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (req.url === '/api/dashboard') {
+  if (requestUrl.pathname === '/' || requestUrl.pathname === '/index.html') {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(INDEX_HTML);
+    return;
+  }
+
+  const sessionUser = readSession(req);
+
+  if (requestUrl.pathname === '/api/session') {
+    if (!sessionUser) {
+      sendJson(res, 401, { error: 'authentication required' });
+      return;
+    }
+    sendJson(res, 200, { username: sessionUser.username, name: sessionUser.name });
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/dashboard') {
+    if (!sessionUser) {
+      sendJson(res, 401, { error: 'authentication required' });
+      return;
+    }
     try {
       sendJson(res, 200, await dashboardData());
     } catch (error) {
@@ -336,15 +531,12 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (req.url === '/' || req.url === '/index.html') {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(INDEX_HTML);
-    return;
-  }
-
-  if (req.url === '/dashboard' || req.url === '/dashboard/') {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(DASHBOARD_HTML);
+  if (requestUrl.pathname === '/dashboard' || requestUrl.pathname === '/dashboard/') {
+    if (!sessionUser) {
+      redirect(res, '/login');
+      return;
+    }
+    sendHtml(res, 200, DASHBOARD_HTML);
     return;
   }
 

@@ -99,6 +99,10 @@
     .topbar { min-height: 34px; display: flex; justify-content: flex-end; align-items: center; gap: 15px; margin-bottom: 22px; color: var(--muted); font-size: .74rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
     .live-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 15px rgba(102, 240, 181, .8); animation: pulse 2.2s infinite; }
     .topbar-divider { width: 1px; height: 17px; background: var(--line); }
+    .user-name { color: var(--text); }
+    .logout-form { margin: 0; }
+    .logout-button { padding: 7px 10px; border: 1px solid var(--line); border-radius: 5px; color: var(--muted); background: rgba(9, 30, 65, .8); font-size: .66rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+    .logout-button:hover { color: var(--text); border-color: var(--mint); }
 
     .panel { border: 2px solid var(--line); border-radius: 9px; background: linear-gradient(145deg, rgba(10, 29, 64, .92), rgba(4, 14, 33, .95)); box-shadow: var(--shadow); overflow: hidden; }
     .overview-panel {
@@ -309,7 +313,7 @@
     </aside>
 
     <main class="main">
-      <header class="topbar"><span class="live-dot" aria-hidden="true"></span><span id="top-status">Connecting to GitLab</span><span class="topbar-divider"></span><time id="clock-date">Loading UTC time</time></header>
+      <header class="topbar"><span class="live-dot" aria-hidden="true"></span><span id="top-status">Connecting to GitLab</span><span class="topbar-divider"></span><time id="clock-date">Loading UTC time</time><span class="topbar-divider"></span><span class="user-name" id="user-name">Authorized member</span><form class="logout-form" method="post" action="/logout"><button class="logout-button" type="submit">Sign out</button></form></header>
 
       <section class="panel overview-panel" id="overview" aria-labelledby="health-title">
         <div class="health-main">
@@ -366,6 +370,7 @@
     const pipelineTitle = document.querySelector('#pipeline-title');
     const pipelineResult = document.querySelector('#pipeline-result');
     const pipelineDuration = document.querySelector('#pipeline-duration');
+    const userName = document.querySelector('#user-name');
     let appIsHealthy = true;
 
     const statusLabels = {
@@ -507,9 +512,24 @@
     async function refreshDashboard() {
       try {
         const response = await fetch('/api/dashboard', { cache: 'no-store' });
+        if (response.status === 401) {
+          window.location.assign('/login');
+          return;
+        }
         if (!response.ok) throw new Error('dashboard unavailable');
         renderDashboard(await response.json());
       } catch (_) { showDashboardUnavailable(); }
+    }
+
+    async function loadSession() {
+      try {
+        const response = await fetch('/api/session', { cache: 'no-store' });
+        if (response.status === 401) {
+          window.location.assign('/login');
+          return;
+        }
+        if (response.ok) userName.textContent = (await response.json()).name;
+      } catch (_) { userName.textContent = 'Authorized member'; }
     }
 
     document.querySelectorAll('.nav-button').forEach((button) => {
@@ -522,6 +542,7 @@
 
     updateClock();
     checkHealth();
+    loadSession();
     refreshDashboard();
     setInterval(updateClock, 1000);
     setInterval(checkHealth, 10000);

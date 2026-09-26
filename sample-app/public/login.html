@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>FoxFlow · Secure Access</title>
+  <style>
+    :root { color-scheme: dark; --navy:#06142f; --panel:#0a2147; --line:#285790; --mint:#66f0b5; --text:#edf6ff; --muted:#8fb5e8; --danger:#ff7b7b; }
+    * { box-sizing: border-box; }
+    body { min-height:100vh; margin:0; display:grid; place-items:center; padding:24px; color:var(--text); background:radial-gradient(circle at 50% 0,#123262 0,transparent 42%),linear-gradient(145deg,#071936,#020817 70%); font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+    .login { width:min(440px,100%); padding:36px; border:2px solid var(--line); border-radius:14px; background:linear-gradient(145deg,rgba(12,38,80,.97),rgba(4,15,35,.98)); box-shadow:0 24px 80px rgba(0,0,0,.45); }
+    .mark { width:76px; height:76px; display:grid; place-items:center; margin:0 auto 22px; border:3px solid #07162b; border-radius:18px; color:#07162b; background:var(--mint); font-size:2.5rem; font-weight:1000; box-shadow:7px 7px 0 #173b67; }
+    h1 { margin:0; text-align:center; font-size:2rem; letter-spacing:.08em; }
+    .subtitle { margin:10px 0 28px; color:var(--muted); text-align:center; font-size:.76rem; letter-spacing:.18em; text-transform:uppercase; }
+    label { display:block; margin:16px 0 7px; color:var(--muted); font-size:.76rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+    input { width:100%; height:50px; padding:0 14px; border:1px solid var(--line); border-radius:7px; outline:none; color:var(--text); background:#06152f; font:inherit; }
+    input:focus { border-color:var(--mint); box-shadow:0 0 0 3px rgba(102,240,181,.14); }
+    button { width:100%; height:52px; margin-top:24px; border:0; border-radius:7px; color:#06142f; background:var(--mint); font:900 .86rem ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; }
+    button:hover { filter:brightness(1.06); }
+    .error { margin:0 0 18px; padding:11px 13px; border:1px solid rgba(255,123,123,.5); border-radius:7px; color:#ffd3d3; background:rgba(116,24,39,.35); font-size:.8rem; }
+    .foot { margin:25px 0 0; color:#638ab9; text-align:center; font-size:.68rem; line-height:1.7; }
+  </style>
+</head>
+<body>
+  <main class="login">
+    <div class="mark" aria-hidden="true">F</div>
+    <h1>FOXFLOW</h1>
+    <p class="subtitle">Control Room · Authorized Access</p>
+    {{LOGIN_ERROR}}
+    <form method="post" action="/login" autocomplete="on">
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" autocomplete="username" maxlength="40" required autofocus>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" maxlength="128" required>
+      <button type="submit">Sign in securely</button>
+    </form>
+    <p class="foot">Protected by encrypted sessions<br>FoxFlow internal delivery platform</p>
+  </main>
+</body>
+</html>

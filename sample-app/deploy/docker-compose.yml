@@ -10,6 +10,8 @@ services:
       GITLAB_API_URL: "${CI_API_V4_URL:?CI_API_V4_URL is required}"
       GITLAB_PROJECT_ID: "${CI_PROJECT_ID:?CI_PROJECT_ID is required}"
       GITLAB_API_TOKEN: "${GITLAB_API_TOKEN:?GITLAB_API_TOKEN is required}"
+      DASHBOARD_USERS_JSON: "${DASHBOARD_USERS_JSON:?DASHBOARD_USERS_JSON is required}"
+      DASHBOARD_SESSION_SECRET: "${DASHBOARD_SESSION_SECRET:?DASHBOARD_SESSION_SECRET is required}"
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(async r=>{const b=await r.json();if(r.status!==200||b.status!=='ok'||b.service!=='foxflow-sample')throw Error('health')}).catch(()=>process.exit(1))"]
       interval: 10s

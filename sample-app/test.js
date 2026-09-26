@@ -4,16 +4,32 @@
 const { test, before, after } = require('node:test');
 const assert = require('node:assert');
 const http = require('http');
+const crypto = require('crypto');
 
 // Start the server on a random free port for the tests
 process.env.PORT = 0;
+const TEST_PASSWORD = 'correct-horse-battery-staple';
+const TEST_SALT = Buffer.from('foxflow-test-salt');
+process.env.DASHBOARD_USERS_JSON = JSON.stringify([{
+  username: 'member',
+  name: 'Test Member',
+  salt: TEST_SALT.toString('base64url'),
+  hash: crypto.scryptSync(TEST_PASSWORD, TEST_SALT, 32).toString('base64url'),
+}]);
+process.env.DASHBOARD_SESSION_SECRET = 'test-session-secret-with-at-least-32-characters';
 const server = require('./server.js');
 
 // Helper: make a request and collect the full response
-function request(method, path) {
+function request(method, path, { body = '', cookie = '' } = {}) {
   return new Promise((resolve, reject) => {
+    const headers = {};
+    if (body) {
+      headers['Content-Type'] = 'application/x-www-form-urlencoded';
+      headers['Content-Length'] = Buffer.byteLength(body);
+    }
+    if (cookie) headers.Cookie = cookie;
     const req = http.request(
-      { method, host: '127.0.0.1', port: server.address().port, path },
+      { method, host: '127.0.0.1', port: server.address().port, path, headers },
       (res) => {
         let body = '';
         res.on('data', (chunk) => (body += chunk));
@@ -21,8 +37,15 @@ function request(method, path) {
       }
     );
     req.on('error', reject);
-    req.end();
+    req.end(body);
   });
+}
+
+async function authenticatedCookie() {
+  const body = new URLSearchParams({ username: 'member', password: TEST_PASSWORD }).toString();
+  const res = await request('POST', '/login', { body });
+  assert.strictEqual(res.status, 303);
+  return res.headers['set-cookie'][0].split(';')[0];
 }
 
 after(() => server.close());
@@ -52,15 +75,35 @@ test('GET / returns 200 and HTML', async () => {
   assert.match(res.body, /href="\/dashboard"/);
 });
 
-test('GET /dashboard returns the live control room', async () => {
+test('dashboard redirects unauthenticated users to login', async () => {
   const res = await request('GET', '/dashboard');
+  assert.strictEqual(res.status, 303);
+  assert.strictEqual(res.headers.location, '/login');
+});
+
+test('login rejects invalid credentials without identifying the account', async () => {
+  const body = new URLSearchParams({ username: 'member', password: 'wrong-password' }).toString();
+  const res = await request('POST', '/login', { body });
+  assert.strictEqual(res.status, 401);
+  assert.match(res.body, /Invalid username or password/);
+});
+
+test('login creates a secure session and opens the control room', async () => {
+  const cookie = await authenticatedCookie();
+  const login = await request('POST', '/login', {
+    body: new URLSearchParams({ username: 'member', password: TEST_PASSWORD }).toString(),
+  });
+  assert.match(login.headers['set-cookie'][0], /HttpOnly/);
+  assert.match(login.headers['set-cookie'][0], /Secure/);
+  assert.match(login.headers['set-cookie'][0], /SameSite=Strict/);
+  const res = await request('GET', '/dashboard', { cookie });
   assert.strictEqual(res.status, 200);
   assert.match(res.headers['content-type'], /text\/html/);
   assert.match(res.body, /FoxFlow Control Room/);
 });
 
 test('GET /api/dashboard fails safely when GitLab integration is unavailable', async () => {
-  const res = await request('GET', '/api/dashboard');
+  const res = await request('GET', '/api/dashboard', { cookie: await authenticatedCookie() });
   assert.strictEqual(res.status, 503);
   assert.deepStrictEqual(JSON.parse(res.body).status, 'unavailable');
   assert.doesNotMatch(res.body, /token/i);
@@ -108,7 +151,7 @@ test('GET /api/dashboard returns a sanitized live pipeline summary', async () =>
   };
 
   try {
-    const res = await request('GET', '/api/dashboard');
+    const res = await request('GET', '/api/dashboard', { cookie: await authenticatedCookie() });
     assert.strictEqual(res.status, 200);
     const body = JSON.parse(res.body);
     assert.strictEqual(body.pipeline.iid, 25);

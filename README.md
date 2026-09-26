@@ -18,6 +18,11 @@ Runner availability, deployment result, Trivy artifact, AI failure summary, and
 activity through a server-side API. The protected `GITLAB_API_TOKEN` remains
 inside the application container and is never sent to the browser.
 
+The operations dashboard requires an individual FoxFlow account. Passwords are
+stored as scrypt hashes in protected GitLab CI/CD variables, and authenticated
+sessions use signed, secure, HTTP-only cookies. The home page and `/health`
+remain public so external health monitoring continues to work.
+
 ## Committee failure demo
 
 After a successful deployment, run the isolated failure demonstration from the
