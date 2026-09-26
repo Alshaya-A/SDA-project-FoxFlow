@@ -27,8 +27,8 @@ printf '%s' "$CI_PROJECT_ID" | grep -Eq '^[0-9]+$' || {
 remote="${DEPLOY_USER}@${DEPLOY_HOST}"
 remote_dir="/tmp/foxflow-copilot-${CI_PIPELINE_ID:-install}"
 tmp_env="$(mktemp)"
-tmp_service="$(mktemp)"
-trap 'rm -f "$tmp_env" "$tmp_service"' EXIT
+tmp_helper="$(mktemp)"
+trap 'rm -f "$tmp_env" "$tmp_helper"' EXIT
 umask 077
 
 {
@@ -41,14 +41,12 @@ umask 077
   printf 'GITLAB_PROJECT_ID=%s\n' "$CI_PROJECT_ID"
   printf 'FOXFLOW_PROJECT_URL=%s\n' "${CI_PROJECT_URL:-http://${DEPLOY_HOST}:8080}"
   printf 'APP_HEALTH_URL=http://127.0.0.1:3000/health\n'
-  printf 'FOXFLOW_BACKUP_DIR=/srv/foxflow/data/backups\n'
-  printf 'FOXFLOW_BACKUP_SCRIPT=/home/%s/SDA-project-FoxFlow/scripts/backup.sh\n' "$DEPLOY_USER"
   if [ -n "${TELEGRAM_ADMIN_USER_IDS:-}" ]; then
     printf 'TELEGRAM_ADMIN_USER_IDS=%s\n' "$TELEGRAM_ADMIN_USER_IDS"
   fi
 } > "$tmp_env"
 
-sed "s/__FOXFLOW_USER__/$DEPLOY_USER/g" copilot/foxflow-copilot.service > "$tmp_service"
+sed "s/__FOXFLOW_USER__/$DEPLOY_USER/g" copilot/foxflow-copilot-tool.sh > "$tmp_helper"
 
 # The validated deployment values are intentionally expanded by this client.
 # shellcheck disable=SC2029
@@ -56,22 +54,31 @@ ssh "$remote" "umask 077; mkdir -p '$remote_dir'"
 scp copilot/ai-tools.json "$remote:$remote_dir/ai-tools.json"
 scp copilot/ai_copilot.py "$remote:$remote_dir/ai_copilot.py"
 scp copilot/ai-copilot.sh "$remote:$remote_dir/ai-copilot.sh"
-scp "$tmp_service" "$remote:$remote_dir/foxflow-copilot.service"
+scp "$tmp_helper" "$remote:$remote_dir/foxflow-copilot-tool"
+scp copilot/foxflow-copilot.service "$remote:$remote_dir/foxflow-copilot.service"
 scp "$tmp_env" "$remote:$remote_dir/copilot.env"
 
 # shellcheck disable=SC2029
 ssh "$remote" "
   set -eu
-  sudo install -d -o '$DEPLOY_USER' -g '$DEPLOY_USER' -m 0750 /opt/foxflow/copilot
-  sudo install -d -o '$DEPLOY_USER' -g '$DEPLOY_USER' -m 0700 /var/lib/foxflow-copilot
+  if ! id foxflow-copilot >/dev/null 2>&1; then
+    sudo useradd --system --home-dir /var/lib/foxflow-copilot --shell /usr/sbin/nologin foxflow-copilot
+  fi
+  sudo install -d -o root -g root -m 0750 /opt/foxflow/copilot
+  sudo install -d -o foxflow-copilot -g foxflow-copilot -m 0700 /var/lib/foxflow-copilot
   sudo install -d -o root -g root -m 0755 /etc/foxflow
-  sudo install -o '$DEPLOY_USER' -g '$DEPLOY_USER' -m 0644 '$remote_dir/ai-tools.json' /opt/foxflow/copilot/ai-tools.json
-  sudo install -o '$DEPLOY_USER' -g '$DEPLOY_USER' -m 0755 '$remote_dir/ai_copilot.py' /opt/foxflow/copilot/ai_copilot.py
-  sudo install -o '$DEPLOY_USER' -g '$DEPLOY_USER' -m 0755 '$remote_dir/ai-copilot.sh' /opt/foxflow/copilot/ai-copilot.sh
+  sudo install -o root -g root -m 0644 '$remote_dir/ai-tools.json' /opt/foxflow/copilot/ai-tools.json
+  sudo install -o root -g root -m 0755 '$remote_dir/ai_copilot.py' /opt/foxflow/copilot/ai_copilot.py
+  sudo install -o root -g root -m 0755 '$remote_dir/ai-copilot.sh' /opt/foxflow/copilot/ai-copilot.sh
+  sudo install -o root -g root -m 0755 '$remote_dir/foxflow-copilot-tool' /usr/local/sbin/foxflow-copilot-tool
   sudo install -o root -g root -m 0644 '$remote_dir/foxflow-copilot.service' /etc/systemd/system/foxflow-copilot.service
   sudo install -o root -g root -m 0600 '$remote_dir/copilot.env' /etc/foxflow/copilot.env
+  printf '%s\n' 'foxflow-copilot ALL=(root) NOPASSWD: /usr/local/sbin/foxflow-copilot-tool *' | sudo tee /etc/sudoers.d/foxflow-copilot >/dev/null
+  sudo chmod 0440 /etc/sudoers.d/foxflow-copilot
+  sudo visudo -cf /etc/sudoers.d/foxflow-copilot >/dev/null
   sudo systemctl daemon-reload
-  sudo systemctl enable --now foxflow-copilot.service
+  sudo systemctl enable foxflow-copilot.service
+  sudo systemctl restart foxflow-copilot.service
   rm -rf '$remote_dir'
 "
 

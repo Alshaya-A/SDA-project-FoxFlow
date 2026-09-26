@@ -132,7 +132,11 @@ available commands are `/status`, `/backup`, `/pipeline`,
 select a tool declared in `sample-app/copilot/ai-tools.json`; it cannot generate
 or execute shell commands. A restart requires `/confirm <code>` from the same
 Telegram user within five minutes. Telegram privacy mode is disabled so natural
-group messages reach the bot; unrelated conversation is ignored.
+group messages reach the bot; unrelated conversation is ignored. The systemd
+service runs under a dedicated unprivileged account. A root-owned helper exposes
+only the fixed backup, status, log, and restart operations needed for protected
+containers and mode-`0600` backup archives; model output cannot add commands or
+targets.
 
 Environment values belong in `docker/.env`, which must remain uncommitted and
 mode `600`. See [platform operations](docs/platform.md) and

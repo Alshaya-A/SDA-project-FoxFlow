@@ -5,14 +5,13 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=__FOXFLOW_USER__
-Group=__FOXFLOW_USER__
+User=foxflow-copilot
+Group=foxflow-copilot
 EnvironmentFile=/etc/foxflow/copilot.env
 WorkingDirectory=/opt/foxflow/copilot
 ExecStart=/opt/foxflow/copilot/ai-copilot.sh
 Restart=always
 RestartSec=5s
-NoNewPrivileges=true
 PrivateTmp=true
 ProtectHome=read-only
 ProtectSystem=full

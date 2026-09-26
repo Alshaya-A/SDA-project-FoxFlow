@@ -8,7 +8,6 @@ fixed Python handlers; model output is never passed to a shell.
 from __future__ import annotations
 
 import fcntl
-import glob
 import json
 import os
 import re
@@ -39,6 +38,7 @@ CONTAINERS = {
     "app": "foxflow-app-app-1",
     "runner": "foxflow-runner",
 }
+PRIVILEGED_HELPER = "/usr/local/sbin/foxflow-copilot-tool"
 STOP = threading.Event()
 EXECUTOR = ThreadPoolExecutor(max_workers=3, thread_name_prefix="copilot")
 PENDING_LOCK = threading.Lock()
@@ -82,6 +82,10 @@ def run(command: list[str], timeout: int = 30) -> subprocess.CompletedProcess[st
         check=False,
         env=os.environ.copy(),
     )
+
+
+def privileged(arguments: list[str], timeout: int = 30) -> subprocess.CompletedProcess[str]:
+    return run(["sudo", PRIVILEGED_HELPER, *arguments], timeout=timeout)
 
 
 def http_json(url: str, *, headers: dict[str, str] | None = None,
@@ -146,12 +150,7 @@ def pipeline_summary_line() -> str:
 
 
 def container_status(service: str, require_health: bool) -> tuple[bool, str]:
-    name = CONTAINERS[service]
-    result = run([
-        "docker", "inspect", "-f",
-        "{{.State.Running}}|{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}",
-        name,
-    ])
+    result = privileged(["container-status", service])
     if result.returncode != 0:
         return False, f"{service}: unavailable"
     running, _, health = result.stdout.strip().partition("|")
@@ -175,13 +174,14 @@ def memory_percent() -> int:
 
 
 def latest_backup_detail() -> str:
-    backup_dir = os.environ.get("FOXFLOW_BACKUP_DIR", "/srv/foxflow/data/backups")
-    files = glob.glob(os.path.join(backup_dir, "*_gitlab_backup.tar"))
-    if not files:
+    result = privileged(["backup-status"])
+    if result.returncode != 0 or result.stdout.strip() == "none":
         return "❌ Backup: none found"
-    latest = max(files, key=os.path.getmtime)
-    hours = max(0, int((time.time() - os.path.getmtime(latest)) / 3600))
-    size_mb = os.path.getsize(latest) / (1024 * 1024)
+    modified_text, separator, size_text = result.stdout.strip().partition("|")
+    if not separator:
+        return "⚠️ Backup status unavailable"
+    hours = max(0, int((time.time() - int(modified_text)) / 3600))
+    size_mb = int(size_text) / (1024 * 1024)
     icon = "✅" if hours < 26 else "⚠️"
     return f"{icon} Backup: {hours}h ago ({size_mb:.0f} MB)"
 
@@ -210,10 +210,6 @@ def check_status(_: dict[str, Any]) -> str:
 
 
 def run_backup(_: dict[str, Any]) -> str:
-    script = os.environ.get(
-        "FOXFLOW_BACKUP_SCRIPT",
-        "/home/azureuser/SDA-project-FoxFlow/scripts/backup.sh",
-    )
     lock_path = STATE_DIR / "backup.lock"
     lock_path.touch(mode=0o600, exist_ok=True)
     with lock_path.open("r+") as lock:
@@ -221,7 +217,7 @@ def run_backup(_: dict[str, Any]) -> str:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
             return "🔄 A GitLab backup is already running."
-        result = run([script], timeout=1800)
+        result = privileged(["backup"], timeout=1800)
     if result.returncode != 0:
         return "❌ Backup failed.\n" + clip("\n".join(result.stdout.splitlines()[-12:]), 1800)
     return "✅ GitLab backup completed and uploaded to Azure.\n" + latest_backup_detail()
@@ -314,7 +310,7 @@ def read_logs(arguments: dict[str, Any]) -> str:
     service = arguments.get("service", "gitlab")
     if service not in CONTAINERS:
         raise ValueError("Service must be gitlab, app, or runner.")
-    result = run(["docker", "logs", "--tail", "50", CONTAINERS[service]], timeout=25)
+    result = privileged(["logs", service], timeout=25)
     return f"📋 Last 50 {service} log lines\n{clip(result.stdout, 2500)}"
 
 
@@ -322,7 +318,7 @@ def restart_service(arguments: dict[str, Any]) -> str:
     service = arguments.get("service")
     if service not in CONTAINERS:
         raise ValueError("Service must be gitlab, app, or runner.")
-    result = run(["docker", "restart", CONTAINERS[service]], timeout=180)
+    result = privileged(["restart", service], timeout=180)
     if result.returncode != 0:
         return f"❌ Could not restart {service}.\n{clip(result.stdout, 1200)}"
     time.sleep(5)
