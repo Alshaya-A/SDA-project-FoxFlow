@@ -21,6 +21,8 @@ case "$GITLAB_EXTERNAL_URL" in *[!a-zA-Z0-9.:/_-]*) echo 'Invalid GITLAB_EXTERNA
 export GITLAB_EXTERNAL_URL
 
 REGISTRY_PORT="${GITLAB_REGISTRY_PORT:-5050}"
+GITLAB_REGISTRY_HOST="${GITLAB_REGISTRY_HOST:-$GITLAB_HOSTNAME}"
+case "$GITLAB_REGISTRY_HOST" in ''|-*|*[!a-zA-Z0-9.-]*) echo 'Invalid GITLAB_REGISTRY_HOST' >&2; exit 1;; esac
 OVERRIDE_FILE="$DOCKER_DIR/docker-compose.override.yml"
 
 install -d -m 0755 \
@@ -37,7 +39,7 @@ services:
         nginx['listen_port'] = 80
         nginx['listen_https'] = false
         gitlab_rails['gitlab_shell_ssh_port'] = ${GITLAB_SSH_PORT}
-        registry_external_url 'http://${GITLAB_HOSTNAME}:${GITLAB_REGISTRY_PORT:-5050}'
+        registry_external_url 'http://${GITLAB_REGISTRY_HOST}:${GITLAB_REGISTRY_PORT:-5050}'
         registry_nginx['listen_port'] = ${GITLAB_REGISTRY_PORT:-5050}
         registry_nginx['listen_https'] = false
     ports:
@@ -53,5 +55,5 @@ chmod 0644 "$OVERRIDE_FILE"
 
 log_info "Azure GitLab override written to $OVERRIDE_FILE."
 log_info "GitLab external URL: ${GITLAB_EXTERNAL_URL}"
-log_info "Registry endpoint: http://${GITLAB_HOSTNAME}:${REGISTRY_PORT}"
+log_info "Registry endpoint: http://${GITLAB_REGISTRY_HOST}:${REGISTRY_PORT}"
 log_info "Run ./scripts/deploy.sh to apply the configuration."
