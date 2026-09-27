@@ -10,9 +10,15 @@ case "$DEPLOY_HOST" in ''|-*|*[!a-zA-Z0-9.-]*) echo 'Use an IPv4 address or DNS 
 default_host="foxflow.$(printf '%s' "$DEPLOY_HOST" | tr '.' '-').sslip.io"
 https_host="${HTTPS_HOST:-$default_host}"
 case "$https_host" in ''|-*|*[!a-zA-Z0-9.-]*) echo 'Invalid HTTPS_HOST' >&2; exit 1;; esac
+default_alt_host="foxflow.$(printf '%s' "$DEPLOY_HOST" | tr '.' '-').nip.io"
+https_alt_host="${HTTPS_ALT_HOST:-$default_alt_host}"
+case "$https_alt_host" in ''|-*|*[!a-zA-Z0-9.-]*) echo 'Invalid HTTPS_ALT_HOST' >&2; exit 1;; esac
 default_gitlab_host="gitlab.$(printf '%s' "$DEPLOY_HOST" | tr '.' '-').sslip.io"
 gitlab_https_host="${GITLAB_HTTPS_HOST:-$default_gitlab_host}"
 case "$gitlab_https_host" in ''|-*|*[!a-zA-Z0-9.-]*) echo 'Invalid GITLAB_HTTPS_HOST' >&2; exit 1;; esac
+default_gitlab_alt_host="gitlab.$(printf '%s' "$DEPLOY_HOST" | tr '.' '-').nip.io"
+gitlab_https_alt_host="${GITLAB_HTTPS_ALT_HOST:-$default_gitlab_alt_host}"
+case "$gitlab_https_alt_host" in ''|-*|*[!a-zA-Z0-9.-]*) echo 'Invalid GITLAB_HTTPS_ALT_HOST' >&2; exit 1;; esac
 
 remote="${DEPLOY_USER}@${DEPLOY_HOST}"
 remote_dir="/tmp/foxflow-https-${CI_PIPELINE_ID:-install}"
@@ -39,7 +45,9 @@ ssh "$remote" "
     --cap-add NET_BIND_SERVICE \
     --add-host host.docker.internal:host-gateway \
     -e FOXFLOW_HTTPS_HOST='$https_host' \
+    -e FOXFLOW_HTTPS_ALT_HOST='$https_alt_host' \
     -e GITLAB_HTTPS_HOST='$gitlab_https_host' \
+    -e GITLAB_HTTPS_ALT_HOST='$gitlab_https_alt_host' \
     -p 80:80 \
     -p 443:443 \
     -v /srv/foxflow/https/Caddyfile:/etc/caddy/Caddyfile:ro \
@@ -51,4 +59,6 @@ ssh "$remote" "
 "
 
 echo "FoxFlow HTTPS proxy installed for https://$https_host"
+echo "FoxFlow alternate HTTPS proxy installed for https://$https_alt_host"
 echo "GitLab HTTPS proxy installed for https://$gitlab_https_host"
+echo "GitLab alternate HTTPS proxy installed for https://$gitlab_https_alt_host"

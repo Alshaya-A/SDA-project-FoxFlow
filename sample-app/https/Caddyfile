@@ -1,4 +1,4 @@
-{$FOXFLOW_HTTPS_HOST} {
+{$FOXFLOW_HTTPS_HOST}, {$FOXFLOW_HTTPS_ALT_HOST} {
   encode zstd gzip
 
   header {
@@ -14,7 +14,7 @@
   reverse_proxy host.docker.internal:3000
 }
 
-{$GITLAB_HTTPS_HOST} {
+{$GITLAB_HTTPS_HOST}, {$GITLAB_HTTPS_ALT_HOST} {
   encode zstd gzip
 
   header {

@@ -61,11 +61,11 @@ bash scripts/test-deploy-local.sh
 
 | الخطوة | النتيجة | الدليل |
 | --- | --- | --- |
-| Build ورفع الصورة | نجح | Pipeline #41، وظيفة `build` |
-| اختبارات Node.js وAI Copilot | نجحت | Pipeline #41، وظيفتا `test` و`copilot_test` |
-| فحص Trivy | نجح | Pipeline #41، وظيفة `security_scan` |
-| النشر عبر SSH | نجح | Pipeline #41، وظيفة `deploy` |
-| إشعار Telegram | نجح | Pipeline #41، وظيفة `notify_success` |
+| Build ورفع الصورة | نجح | Pipeline #44، وظيفة `build` |
+| اختبارات Node.js وAI Copilot | نجحت | Pipeline #44، وظيفتا `test` و`copilot_test` |
+| فحص Trivy | نجح | Pipeline #44، وظيفة `security_scan` |
+| النشر عبر SSH | نجح | Pipeline #44، وظيفة `deploy` |
+| إشعار Telegram | نجح | Pipeline #44، وظيفة `notify_success` |
 | حماية لوحة العمليات | نجحت | الزائر غير المسجل يحول إلى `/login` و`/api/dashboard` يعيد 401 |
 | حسابات الفريق | نجحت | جرى اختبار دخول الحسابات الأربعة دون إظهار كلمات المرور |
 | HTTPS | نجح | التطبيق وGitLab يعملان بشهادات موثوقة على المنفذ 443 |
