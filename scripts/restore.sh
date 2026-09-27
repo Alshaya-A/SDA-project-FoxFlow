@@ -6,15 +6,24 @@ source "$SCRIPT_DIR/lib.sh"
 set -a; source "$DOCKER_DIR/.env"; set +a
 
 BACKUP_TIMESTAMP="${1:-}"
+BACKUP_TIER="${2:-daily}"
 if [[ -z "$BACKUP_TIMESTAMP" ]]; then
-  log_error "Usage: ./restore.sh <BACKUP_TIMESTAMP>  (e.g. 20261015_030000)"
+  log_error "Usage: ./restore.sh <BACKUP_TIMESTAMP> [daily|weekly|monthly]"
   exit 1
 fi
 
+case "$BACKUP_TIER" in
+  daily|weekly|monthly) ;;
+  *)
+    log_error "Backup tier must be daily, weekly, or monthly."
+    exit 1
+    ;;
+esac
+
 CONTAINER="foxflow-gitlab"
-BLOB_NAME="${BACKUP_TIMESTAMP}_gitlab_backup.tar"
+BLOB_NAME="${BACKUP_TIER}/${BACKUP_TIMESTAMP}_gitlab_backup.tar"
 BACKUP_DIR="${GITLAB_BACKUP_DIR:-${FOXFLOW_DATA_PATH}/data/backups}"
-LOCAL_PATH="${BACKUP_DIR}/${BLOB_NAME}"
+LOCAL_PATH="${BACKUP_DIR}/${BACKUP_TIMESTAMP}_gitlab_backup.tar"
 
 log_info "Downloading backup $BLOB_NAME from Azure..."
 if [[ -n "${AZURE_BACKUP_SAS_TOKEN:-}" ]]; then

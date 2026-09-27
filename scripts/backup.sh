@@ -7,6 +7,15 @@ set -a; source "$DOCKER_DIR/.env"; set +a
 
 CONTAINER="foxflow-gitlab"
 TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
+BACKUP_TIER="${1:-daily}"
+
+case "$BACKUP_TIER" in
+  daily|weekly|monthly) ;;
+  *)
+    log_error "Usage: ./backup.sh [daily|weekly|monthly]"
+    exit 1
+    ;;
+esac
 
 log_info "Creating GitLab backup inside container..."
 docker exec "$CONTAINER" gitlab-backup create BACKUP="$TIMESTAMP"
@@ -21,11 +30,12 @@ fi
 
 log_info "Backup created: $BACKUP_FILE"
 
-log_info "Uploading backup to Azure Blob Storage..."
+BLOB_NAME="${BACKUP_TIER}/$(basename "$BACKUP_FILE")"
+log_info "Uploading $BACKUP_TIER backup to Azure Blob Storage as $BLOB_NAME..."
 if [[ -n "${AZURE_BACKUP_SAS_TOKEN:-}" ]]; then
   require_command curl
   SAS_TOKEN="${AZURE_BACKUP_SAS_TOKEN#\?}"
-  BLOB_URL="https://${AZURE_BACKUP_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_BACKUP_CONTAINER}/$(basename "$BACKUP_FILE")?${SAS_TOKEN}"
+  BLOB_URL="https://${AZURE_BACKUP_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_BACKUP_CONTAINER}/${BLOB_NAME}?${SAS_TOKEN}"
   curl --fail-with-body --silent --show-error \
     --request PUT \
     --header "x-ms-blob-type: BlockBlob" \
@@ -36,10 +46,15 @@ else
   az storage blob upload \
     --account-name "${AZURE_BACKUP_STORAGE_ACCOUNT}" \
     --container-name "${AZURE_BACKUP_CONTAINER}" \
-    --name "$(basename "$BACKUP_FILE")" \
+    --name "$BLOB_NAME" \
     --file "$BACKUP_FILE" \
     --auth-mode login \
     --overwrite
 fi
 
-log_info "Backup uploaded successfully to ${AZURE_BACKUP_STORAGE_ACCOUNT}/${AZURE_BACKUP_CONTAINER}"
+log_info "Backup uploaded successfully to ${AZURE_BACKUP_STORAGE_ACCOUNT}/${AZURE_BACKUP_CONTAINER}/${BLOB_NAME}"
+
+# Azure holds the long-term weekly and monthly copies. Keep the VM's local
+# recovery cache bounded to four days regardless of the remote tier.
+find "$BACKUP_DIR" -maxdepth 1 -type f -name '*_gitlab_backup.tar' -mtime +3 -delete
+log_info "Removed local backup archives older than four days."

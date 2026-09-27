@@ -5,6 +5,12 @@ DOCKER_DIR="$(cd "$SCRIPT_DIR/../docker" && pwd)"
 source "$SCRIPT_DIR/lib.sh"
 set -a; source "$DOCKER_DIR/.env"; set +a
 
+BACKUP_TIER="${1:-}"
+if [[ -n "$BACKUP_TIER" && ! "$BACKUP_TIER" =~ ^(daily|weekly|monthly)$ ]]; then
+  log_error "Usage: ./verify-backup.sh [daily|weekly|monthly]"
+  exit 1
+fi
+
 if [[ -n "${AZURE_BACKUP_SAS_TOKEN:-}" ]]; then
   require_command curl
   require_command python3
@@ -15,12 +21,14 @@ if [[ -n "${AZURE_BACKUP_SAS_TOKEN:-}" ]]; then
   curl --fail-with-body --silent --show-error \
     "${CONTAINER_URL}?restype=container&comp=list&${SAS_TOKEN}" \
     --output "$LIST_FILE"
-  LATEST_BLOB="$(python3 - "$LIST_FILE" <<'PY'
+  LATEST_BLOB="$(python3 - "$LIST_FILE" "$BACKUP_TIER" <<'PY'
 import sys
 import xml.etree.ElementTree as ET
 
 root = ET.parse(sys.argv[1]).getroot()
 blobs = root.findall("./Blobs/Blob")
+prefix = sys.argv[2] + "/" if len(sys.argv) > 2 and sys.argv[2] else ""
+blobs = [blob for blob in blobs if blob.findtext("Name", "").startswith(prefix)]
 if blobs:
     latest = max(blobs, key=lambda blob: blob.findtext("Properties/Last-Modified", ""))
     print(latest.findtext("Name", ""))
@@ -28,9 +36,14 @@ PY
 )"
 else
   require_command az
+  LIST_ARGS=()
+  if [[ -n "$BACKUP_TIER" ]]; then
+    LIST_ARGS+=(--prefix "$BACKUP_TIER/")
+  fi
   LATEST_BLOB="$(az storage blob list \
     --account-name "${AZURE_BACKUP_STORAGE_ACCOUNT}" \
     --container-name "${AZURE_BACKUP_CONTAINER}" \
+    "${LIST_ARGS[@]}" \
     --auth-mode login \
     --query "sort_by([], &properties.lastModified)[-1].name" -o tsv)"
 fi
@@ -41,7 +54,7 @@ if [[ -z "$LATEST_BLOB" ]]; then
 fi
 
 log_info "Latest backup found: $LATEST_BLOB"
-TMP_FILE="/tmp/${LATEST_BLOB}"
+TMP_FILE="/tmp/$(basename "$LATEST_BLOB")"
 
 if [[ -n "${AZURE_BACKUP_SAS_TOKEN:-}" ]]; then
   curl --fail-with-body --silent --show-error \

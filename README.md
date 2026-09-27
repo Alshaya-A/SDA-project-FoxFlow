@@ -12,6 +12,13 @@ application deployed automatically after build, test, and security gates pass.
 - Health endpoint: `https://foxflow.20-127-65-116.sslip.io/health`
 - Live dashboard API: `https://foxflow.20-127-65-116.sslip.io/api/dashboard`
 
+If a network blocks `sslip.io`, use the equivalent HTTPS fallback links:
+
+- GitLab fallback: `https://gitlab.20-127-65-116.nip.io`
+- Application fallback: `https://foxflow.20-127-65-116.nip.io`
+- Dashboard fallback: `https://foxflow.20-127-65-116.nip.io/dashboard`
+- Health fallback: `https://foxflow.20-127-65-116.nip.io/health`
+
 The application home page and the live operations dashboard are separate pages
 inside the same service. The dashboard reads the latest GitLab pipeline, jobs,
 Runner availability, deployment result, Trivy artifact, AI failure summary, and
@@ -35,10 +42,10 @@ bash scripts/committee-failure-demo.sh recover
 bash scripts/committee-failure-demo.sh cleanup
 ```
 - Default branch: protected `main`
-- Latest verified protected-dashboard deployment: GitLab Pipeline **#41**
-- Pipeline jobs: `build`, `test`, `security_scan`, `deploy`, and `notify`
-- Off-site GitLab backup: verified in Azure Blob Storage on 21 September 2026
-- Backup schedule: daily at 03:00 on the VM
+- Latest verified protected-dashboard deployment: GitLab Pipeline **#44**
+- Pipeline jobs: `build`, `test`, `copilot_test`, `security_scan`, `deploy`, and `notify_success`
+- Off-site GitLab backup: verified in Azure Blob Storage on 26 September 2026
+- Backup schedule: every 6 hours, weekly, and monthly, with tiered retention
 
 The verified health response is:
 

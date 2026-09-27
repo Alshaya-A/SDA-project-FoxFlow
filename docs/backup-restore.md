@@ -14,16 +14,20 @@ This document covers how GitLab data is backed up, verified, and restored.
 
 ## Backup Schedule
 
-- `backup.sh` runs on demand.
-- `configure-backup-cron.sh` installs a daily cron job at 03:00 (host time)
-  that calls `backup.sh` and appends output to `../backup.log`.
+- `backup.sh daily|weekly|monthly` runs on demand and stores the archive below
+  the matching Azure Blob prefix.
+- `configure-backup-cron.sh` installs three root cron schedules (host time):
+  - Daily tier: every 6 hours at `00:00`, `06:00`, `12:00`, and `18:00`.
+  - Weekly tier: every Sunday at `03:15`.
+  - Monthly tier: the first day of every month at `03:30`.
+- All jobs append output to `../backup.log`.
 
 ## Verified Azure Run
 
-On 21 September 2026, the live VM created
-`20260921_083518_gitlab_backup.tar`, uploaded it to the private
+On 26 September 2026, the live VM created
+`20260926_030001_gitlab_backup.tar`, uploaded it to the private
 `ffbackupstorage01/gitlab-backups` container, downloaded it again, and passed
-the `tar -tf` integrity check. The uploaded object was 81,305,600 bytes. The
+the `tar -tf` integrity check. The uploaded object was 82,370,560 bytes. The
 daily root cron entry was also confirmed on the VM.
 
 ## What backup.sh Does
@@ -31,7 +35,8 @@ daily root cron entry was also confirmed on the VM.
 1. Runs `gitlab-backup create BACKUP=<timestamp>` inside the container.
 2. Validates that the resulting `.tar` file exists at the expected path
    (`${FOXFLOW_DATA_PATH}/data/backups/` by default).
-3. Uploads the file to Azure Blob Storage. Managed Identity with
+3. Uploads the file to `daily/`, `weekly/`, or `monthly/` in Azure Blob
+   Storage. Managed Identity with
    `Storage Blob Data Contributor` and Azure CLI is preferred. When assigning
    that role is not available, a container-scoped SAS token can be supplied as
    `AZURE_BACKUP_SAS_TOKEN`; the script then uploads directly with `curl`.
@@ -52,7 +57,8 @@ daily root cron entry was also confirmed on the VM.
 
 ## Verifying Backups
 
-`verify-backup.sh` downloads the latest blob from Azure and runs `tar -tf`
+`verify-backup.sh [daily|weekly|monthly]` downloads the latest matching blob
+from Azure and runs `tar -tf`
 against it. This confirms:
 - A backup exists in Azure.
 - The archive is not corrupted in transit.
@@ -61,7 +67,8 @@ Run this at least weekly, or wire it into a monitoring alert.
 
 ## Restoring
 
-`restore.sh <BACKUP_TIMESTAMP>` performs a full restore:
+`restore.sh <BACKUP_TIMESTAMP> [daily|weekly|monthly]` performs a full restore.
+The tier defaults to `daily` when omitted:
 
 1. Downloads the specified backup from Azure.
 2. Stops `puma` and `sidekiq` inside the container (keeping PostgreSQL up).
@@ -85,7 +92,14 @@ Mac, use `backup-local-test.sh` instead - it exercises the same
 
 ## Retention
 
-Currently no automated cleanup is configured. GitLab's own
-`gitlab_rails['backup_keep_time']` can be set in `gitlab.rb.template`
-to auto-prune old backups (in seconds). For remote retention, use an
-Azure Blob lifecycle policy on the container.
+Retention is enforced in two places:
+
+- VM local archives are deleted after four days by `backup.sh`.
+- Azure Blob lifecycle rules delete:
+  - `daily/` archives after 4 days.
+  - `weekly/` archives after 28 days (4 weeks).
+  - `monthly/` archives after 120 days (approximately 4 months).
+  - legacy root-level archives after 4 days.
+
+Azure lifecycle deletion runs asynchronously, so an expired blob can remain
+visible briefly before Azure processes the rule.

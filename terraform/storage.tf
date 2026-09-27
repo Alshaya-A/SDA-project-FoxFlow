@@ -34,3 +34,74 @@ resource "azurerm_storage_container" "ff_backup_container" {
   storage_account_id    = azurerm_storage_account.ff_backup_storage.id
   container_access_type = "private"
 }
+
+# Retain frequent recovery points briefly and keep progressively older weekly
+# and monthly recovery points. Prefixes include the container name as required
+# by Azure Storage lifecycle rules.
+resource "azurerm_storage_management_policy" "ff_backup_retention" {
+  storage_account_id = azurerm_storage_account.ff_backup_storage.id
+
+  rule {
+    name    = "delete-daily-after-4-days"
+    enabled = true
+
+    filters {
+      prefix_match = ["${azurerm_storage_container.ff_backup_container.name}/daily/"]
+      blob_types   = ["blockBlob"]
+    }
+
+    actions {
+      base_blob {
+        delete_after_days_since_modification_greater_than = 4
+      }
+    }
+  }
+
+  rule {
+    name    = "delete-weekly-after-4-weeks"
+    enabled = true
+
+    filters {
+      prefix_match = ["${azurerm_storage_container.ff_backup_container.name}/weekly/"]
+      blob_types   = ["blockBlob"]
+    }
+
+    actions {
+      base_blob {
+        delete_after_days_since_modification_greater_than = 28
+      }
+    }
+  }
+
+  rule {
+    name    = "delete-monthly-after-4-months"
+    enabled = true
+
+    filters {
+      prefix_match = ["${azurerm_storage_container.ff_backup_container.name}/monthly/"]
+      blob_types   = ["blockBlob"]
+    }
+
+    actions {
+      base_blob {
+        delete_after_days_since_modification_greater_than = 120
+      }
+    }
+  }
+
+  rule {
+    name    = "delete-legacy-backups-after-4-days"
+    enabled = true
+
+    filters {
+      prefix_match = ["${azurerm_storage_container.ff_backup_container.name}/20"]
+      blob_types   = ["blockBlob"]
+    }
+
+    actions {
+      base_blob {
+        delete_after_days_since_modification_greater_than = 4
+      }
+    }
+  }
+}
